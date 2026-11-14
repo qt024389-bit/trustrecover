@@ -13,7 +13,7 @@ Built for **Avalanche Team1 Vietnam UniHack 2026**.
    - **DoubtStamp (Evidence Consistency Analysis)**: Cross-checks user claims and uploaded evidence (including multimodal images/PDFs and SHA-256 commitment hashes) against real Fuji on-chain data, classifying findings as `VERIFIED`, `CONTRADICTED`, `INSUFFICIENT`, or `UNVERIFIABLE`.
    - **LEGALMIND (Recovery Intelligence)**: Produces prioritized technical checklists, missing-evidence steps, and legal reference scopes with mandatory disclaimers (never promises fund recovery or blockchain reversal).
 3. **Immutable Audit Trail on Avalanche Fuji (`contracts/TrustRecoverRegistry.sol`)**:
-   - Deployed Contract Address (Fuji Testnet): [`0x703c3A588265262B93C0a6b83B814a393f446CBc`](https://testnet.snowtrace.io/address/0x703c3A588265262B93C0a6b83B814a393f446CBc)
+   - Deployed Contract Address (Fuji Testnet): [`0xccED09099039A707fc5bda1274E647aC297B9D5F`](https://testnet.snowtrace.io/address/0xccED09099039A707fc5bda1274E647aC297B9D5F)
    - Human Reviewers sign via MetaMask/Core Wallet to anchor `caseId`, `txHash`, `reportHash`, and `verdict` on-chain.
 
 ## Local Setup
