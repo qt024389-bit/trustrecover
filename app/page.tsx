@@ -60,7 +60,7 @@ export default function Home() {
           <div>
             <div className="mb-8">
               <img
-                src="/logo.png"
+                src="/logo.jpg"
                 alt="TrustRecover AI"
                 className="w-full max-w-[220px] rounded-2xl border border-white/10 bg-black/40 p-2 object-contain"
               />
