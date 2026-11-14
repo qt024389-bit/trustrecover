@@ -107,7 +107,7 @@ export default function DisputeIntelligenceWorkspace() {
   }
 
   return (
-    <div className="mt-10 rounded-3xl border border-cyan-500/25 bg-gradient-to-b from-slate-900/90 to-slate-950/95 p-6 text-slate-100 shadow-2xl shadow-cyan-950/30 backdrop-blur sm:p-8">
+    <div className="mt-4 w-full max-w-full overflow-hidden rounded-3xl border border-cyan-500/25 bg-gradient-to-b from-slate-900/90 to-slate-950/95 p-5 text-slate-100 shadow-2xl shadow-cyan-950/30 backdrop-blur sm:p-8">
       {/* Header */}
       <div className="flex flex-wrap items-center justify-between gap-4 border-b border-white/10 pb-5">
         <div>

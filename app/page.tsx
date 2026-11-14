@@ -53,7 +53,7 @@ export default function Home() {
   const currentMeta = TAB_META[activeTab];
 
   return (
-    <main className="min-h-screen bg-[#080d18] text-white">
+    <main className="min-h-screen overflow-x-hidden bg-[#080d18] text-white">
       <div className="mx-auto flex min-h-screen max-w-7xl flex-col lg:flex-row">
         {/* Sidebar Navigation */}
         <aside className="flex w-full flex-col justify-between border-b border-white/10 bg-[#0b1220] p-6 lg:w-72 lg:border-b-0 lg:border-r">
@@ -108,7 +108,7 @@ export default function Home() {
         </aside>
 
         {/* Main Content Area */}
-        <section className="flex flex-1 flex-col justify-between p-6 lg:p-10">
+        <section className="flex min-w-0 flex-1 flex-col justify-between p-6 lg:p-10">
           <div>
             <header className="mb-8 flex flex-wrap items-center justify-between gap-4">
               <div>
@@ -208,14 +208,14 @@ export default function Home() {
             )}
 
             {/* TAB 2: DISPUTE CASES */}
-            {activeTab === "cases" && <OnChainStatsAndCases />}
+            <div className={activeTab === "cases" ? "block" : "hidden"}><OnChainStatsAndCases /></div>
 
             {/* TAB 3: EVIDENCE ANALYSIS */}
-            {activeTab === "analysis" && <DisputeIntelligenceWorkspace />}
+            <div className={activeTab === "analysis" ? "block" : "hidden"}><DisputeIntelligenceWorkspace /></div>
 
             {/* TAB 4: AVALANCHE AUDIT */}
-            {activeTab === "audit" && (
-              <div className="space-y-6">
+            <div className={activeTab === "audit" ? "block space-y-6" : "hidden"}>
+              <div>
                 <div className="rounded-2xl border border-white/10 bg-[#111b2d] p-5 text-xs">
                   <div className="font-semibold text-white">
                     TrustRecoverRegistry v2 (Avalanche Fuji Testnet)
@@ -235,7 +235,7 @@ export default function Home() {
                 </div>
                 <FujiTransactionVerifier />
               </div>
-            )}
+            </div>
 
             {/* TAB 5: SETTINGS */}
             {activeTab === "settings" && (
