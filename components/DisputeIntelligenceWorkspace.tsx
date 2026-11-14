@@ -155,7 +155,7 @@ export default function DisputeIntelligenceWorkspace() {
           <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
             <div>
               <label className="block text-xs font-medium text-slate-300">
-                Số tiền khiếu nại (AVAX - Tùy chọn)
+                Số tiền khiếu nại (AVAX)
               </label>
               <input
                 type="text"
@@ -167,7 +167,7 @@ export default function DisputeIntelligenceWorkspace() {
             </div>
             <div>
               <label className="block text-xs font-medium text-slate-300">
-                Địa chỉ ví nhận / Hợp đồng theo lời khai (Tùy chọn)
+                Địa chỉ nhận theo lời khai (0x...)
               </label>
               <input
                 type="text"
@@ -280,7 +280,7 @@ export default function DisputeIntelligenceWorkspace() {
             </div>
 
             <div className="rounded-2xl border border-cyan-500/30 bg-slate-900/70 p-4">
-              <div className="flex items-center justify-between">
+              <div className="flex flex-wrap items-center justify-between gap-2">
                 <span className="text-[11px] uppercase tracking-wider text-slate-400">
                   Evidence Sufficiency Score
                 </span>
@@ -311,7 +311,7 @@ export default function DisputeIntelligenceWorkspace() {
           {/* 1. VERIFIED ON-CHAIN FACTS vs AI INVESTIGATION (AskPay) */}
           <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
             <div className="rounded-2xl border border-emerald-500/30 bg-emerald-950/15 p-5">
-              <div className="flex items-center justify-between">
+              <div className="flex flex-wrap items-center justify-between gap-2">
                 <h3 className="text-sm font-bold text-emerald-300">
                   Verified Blockchain Facts (Dữ liệu gốc từ Fuji RPC)
                 </h3>
@@ -384,7 +384,7 @@ export default function DisputeIntelligenceWorkspace() {
             </div>
 
             <div className="rounded-2xl border border-cyan-500/30 bg-slate-900/70 p-5">
-              <div className="flex items-center justify-between">
+              <div className="flex flex-wrap items-center justify-between gap-2">
                 <h3 className="text-sm font-bold text-cyan-300">
                   AskPay – AI Transaction Intelligence
                 </h3>
@@ -571,11 +571,11 @@ export default function DisputeIntelligenceWorkspace() {
                   key={step.step}
                   className="rounded-xl border border-white/10 bg-slate-950/70 p-3.5 text-xs"
                 >
-                  <div className="flex items-center justify-between">
+                  <div className="flex flex-wrap items-center justify-between gap-2">
                     <span className="font-bold text-white">
                       Bước {step.step}: {step.title}
                     </span>
-                    <span className="rounded bg-cyan-500/15 px-2 py-0.5 font-mono text-[10px] text-cyan-300">
+                    <span className="shrink-0 whitespace-nowrap rounded-md bg-cyan-500/15 px-2 py-0.5 font-mono text-[10px] font-medium text-cyan-300 ring-1 ring-cyan-500/20">
                       {step.category} • {step.priority}
                     </span>
                   </div>
@@ -638,7 +638,7 @@ export default function DisputeIntelligenceWorkspace() {
                       <span>•</span>
                       <span className="font-bold">{log.action}</span>
                     </div>
-                    <p className="text-slate-300">{log.detail}</p>
+                    <p className="break-words text-slate-300">{log.detail}</p>
                   </div>
                 ))}
               </div>
