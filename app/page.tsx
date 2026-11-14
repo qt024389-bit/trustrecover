@@ -59,15 +59,17 @@ export default function Home() {
         <aside className="flex w-full flex-col justify-between border-b border-white/10 bg-[#0b1220] p-6 lg:w-72 lg:border-b-0 lg:border-r">
           <div>
             <div className="mb-8">
-              <h1 className="text-xl font-bold tracking-wider text-cyan-300">
-                TRUSTRECOVER
-              </h1>
-              <p className="mt-1 text-xs text-slate-400">
+              <img
+                src="/logo.png"
+                alt="TrustRecover AI"
+                className="w-full max-w-[220px] rounded-2xl border border-white/10 bg-black/40 p-2 object-contain"
+              />
+              <p className="mt-2 text-xs text-slate-400">
                 Nền tảng AI điều tra & hỗ trợ xử lý tranh chấp DeFi
               </p>
             </div>
 
-            <p className="mb-3 text-[11px] font-semibold uppercase tracking-widest text-slate-500">
+            <p className="mb-3 text-[11px] font-bold uppercase tracking-widest text-white">
               KHÔNG GIAN LÀM VIỆC
             </p>
 
