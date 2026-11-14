@@ -113,17 +113,17 @@ export default function DisputeIntelligenceWorkspace() {
         <div>
           <div className="flex flex-wrap items-center gap-2">
             <span className="rounded-full bg-cyan-500/15 px-3 py-1 text-xs font-semibold text-cyan-300 ring-1 ring-cyan-400/30">
-              UNIFIED AI DISPUTE PIPELINE
+              LUỒNG ĐIỀU TRA TRANH CHẤP AI HỢP NHẤT
             </span>
             <span className="rounded-full bg-white/5 px-3 py-1 text-xs text-slate-300 ring-1 ring-white/10">
               AskPay • DoubtStamp • LEGALMIND
             </span>
           </div>
           <h2 className="mt-2 text-xl font-bold tracking-tight text-white">
-            AI Evidence Analysis & Recovery Intelligence Workspace
+            Không gian Phân tích Bằng chứng & Hỗ trợ Xử lý Tranh chấp
           </h2>
           <p className="mt-1 text-xs text-slate-400">
-            AI investigates • Evidence is verified on Avalanche Fuji (43113) • Human reviewers validate outcomes
+            AI điều tra • Xác minh dữ liệu trên Avalanche Fuji (43113) • Con người xác nhận kết quả
           </p>
         </div>
 
@@ -141,7 +141,7 @@ export default function DisputeIntelligenceWorkspace() {
         <div className="space-y-3 lg:col-span-2">
           <div>
             <label className="block text-xs font-medium text-slate-300">
-              1. Avalanche Fuji Transaction Hash (Bắt buộc)
+              1. Mã giao dịch Avalanche Fuji (Transaction Hash - Bắt buộc)
             </label>
             <input
               type="text"
@@ -181,7 +181,7 @@ export default function DisputeIntelligenceWorkspace() {
 
           <div>
             <label className="block text-xs font-medium text-slate-300">
-              2. Nội dung khiếu nại chi tiết của người dùng (User Claim)
+              2. Nội dung khiếu nại chi tiết của người dùng
             </label>
             <textarea
               rows={3}
@@ -197,7 +197,7 @@ export default function DisputeIntelligenceWorkspace() {
         <div className="flex flex-col justify-between rounded-2xl border border-white/10 bg-slate-900/60 p-4">
           <div>
             <label className="block text-xs font-semibold text-cyan-300">
-              3. Tải lên bằng chứng (Evidence Upload)
+              3. Tải lên tệp bằng chứng
             </label>
             <p className="mt-1 text-[11px] text-slate-400">
               Hỗ trợ TXT, JSON, CSV, MD, LOG, PDF, PNG, JPG (Tối đa 5 tệp, mỗi tệp &le; 5MB). Hệ thống tự động băm SHA-256 để cố định tính toàn vẹn phiên bản.
@@ -282,7 +282,7 @@ export default function DisputeIntelligenceWorkspace() {
             <div className="rounded-2xl border border-cyan-500/30 bg-slate-900/70 p-4">
               <div className="flex flex-wrap items-center justify-between gap-2">
                 <span className="text-[11px] uppercase tracking-wider text-slate-400">
-                  Evidence Sufficiency Score
+                  Điểm đầy đủ bằng chứng
                 </span>
                 <span className="font-mono text-lg font-bold text-cyan-300">
                   {analysis.aiInvestigation.doubtStamp.evidenceSufficiencyScore}/100
@@ -308,15 +308,15 @@ export default function DisputeIntelligenceWorkspace() {
             </div>
           </div>
 
-          {/* 1. VERIFIED ON-CHAIN FACTS vs AI INVESTIGATION (AskPay) */}
+          {/* 1. VERIFIED DỮ LIỆU GỐCS vs AI INVESTIGATION (AskPay) */}
           <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
             <div className="rounded-2xl border border-emerald-500/30 bg-emerald-950/15 p-5">
               <div className="flex flex-wrap items-center justify-between gap-2">
                 <h3 className="text-sm font-bold text-emerald-300">
-                  Verified Blockchain Facts (Dữ liệu gốc từ Fuji RPC)
+                  Dữ liệu xác thực trên Blockchain (Fuji RPC)
                 </h3>
                 <span className="shrink-0 whitespace-nowrap rounded-md bg-emerald-500/15 px-2.5 py-0.5 font-mono text-[10px] font-semibold text-emerald-300 ring-1 ring-emerald-500/30">
-                  ON-CHAIN FACT
+                  DỮ LIỆU GỐC
                 </span>
               </div>
               {analysis.onChainVerification.txData ? (
@@ -386,10 +386,10 @@ export default function DisputeIntelligenceWorkspace() {
             <div className="rounded-2xl border border-cyan-500/30 bg-slate-900/70 p-5">
               <div className="flex flex-wrap items-center justify-between gap-2">
                 <h3 className="text-sm font-bold text-cyan-300">
-                  AskPay – AI Transaction Intelligence
+                  AskPay – Phân tích Giao dịch On-Chain
                 </h3>
                 <span className="shrink-0 whitespace-nowrap rounded-md bg-cyan-500/15 px-2.5 py-0.5 font-mono text-[10px] font-semibold text-cyan-300 ring-1 ring-cyan-500/30">
-                  AI ANALYSIS ({analysis.aiInvestigation.modelUsed})
+                  PHÂN TÍCH AI ({analysis.aiInvestigation.modelUsed})
                 </span>
               </div>
               <div className="mt-3 space-y-2.5 break-words text-xs leading-relaxed text-slate-200">
@@ -437,7 +437,7 @@ export default function DisputeIntelligenceWorkspace() {
           <div className="rounded-2xl border border-white/10 bg-slate-900/80 p-5">
             <div className="flex flex-wrap items-center justify-between gap-2">
               <h3 className="text-sm font-bold text-cyan-300">
-                DoubtStamp – Đối Chiếu Lời Khai, Bằng Chứng & Phát Hiện Mâu Thuẫn
+                DoubtStamp – Đối chiếu Lời khai & Phát hiện Mâu thuẫn
               </h3>
               <span className="text-xs text-slate-400">
                 Phân loại: VERIFIED • CONTRADICTED • INSUFFICIENT • UNVERIFIABLE
@@ -524,7 +524,7 @@ export default function DisputeIntelligenceWorkspace() {
             <div className="mt-5 grid grid-cols-1 gap-4 md:grid-cols-2">
               <div className="rounded-xl border border-rose-500/30 bg-rose-950/20 p-4">
                 <h4 className="text-xs font-bold text-rose-300">
-                  Điểm Mâu Thuẫn Phát Hiện (Contradictions)
+                  Điểm mâu thuẫn phát hiện
                 </h4>
                 {analysis.aiInvestigation.doubtStamp.contradictions.length > 0 ? (
                   <ul className="mt-2 list-disc space-y-1 pl-4 text-xs text-rose-200">
@@ -543,7 +543,7 @@ export default function DisputeIntelligenceWorkspace() {
 
               <div className="rounded-xl border border-amber-500/30 bg-amber-950/20 p-4">
                 <h4 className="text-xs font-bold text-amber-300">
-                  Bằng Chứng Còn Thiếu (Missing Evidence)
+                  Bằng chứng còn thiếu
                 </h4>
                 <ul className="mt-2 list-disc space-y-1 pl-4 text-xs text-amber-100">
                   {analysis.aiInvestigation.doubtStamp.missingEvidence.map(
@@ -559,7 +559,7 @@ export default function DisputeIntelligenceWorkspace() {
           {/* 3. LEGALMIND: Recovery Recommendations */}
           <div className="rounded-2xl border border-cyan-500/30 bg-slate-900/80 p-5">
             <h3 className="text-sm font-bold text-cyan-300">
-              LEGALMIND – Recovery Intelligence & Checklist Xử Lý Tranh Chấp
+              LEGALMIND – Đề xuất Hướng xử lý & Danh sách kiểm tra
             </h3>
             <p className="mt-2 text-xs text-slate-300">
               {analysis.aiInvestigation.legalMind.executiveSummary}
@@ -623,7 +623,7 @@ export default function DisputeIntelligenceWorkspace() {
           <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
             <div className="rounded-2xl border border-white/10 bg-slate-900/70 p-4 lg:col-span-2">
               <h4 className="text-xs font-bold uppercase tracking-wider text-slate-300">
-                Audit History (Nhật ký Kiểm toán Hồ sơ)
+                Nhật ký kiểm toán hồ sơ (Audit History)
               </h4>
               <div className="mt-3 space-y-2.5">
                 {analysis.auditHistory.map((log, i) => (
@@ -647,7 +647,7 @@ export default function DisputeIntelligenceWorkspace() {
             <div className="flex flex-col justify-between rounded-2xl border border-white/10 bg-slate-900/70 p-4">
               <div>
                 <h4 className="text-xs font-bold uppercase tracking-wider text-slate-300">
-                  Human Reviewer Validation
+                  Kiểm duyệt viên xác nhận
                 </h4>
                 <p className="mt-2 text-xs text-slate-400">
                   Theo nguyên tắc cốt lõi của TRUSTRECOVER, AI không tự đưa ra phán quyết cuối cùng. Kiểm duyệt viên con người xác nhận kết quả sau khi đối chiếu bằng chứng:

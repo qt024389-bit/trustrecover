@@ -42,24 +42,24 @@ export default function OnChainStatsAndCases() {
 
   const liveStats = [
     {
-      label: "On-chain Anchored Cases",
+      label: "Hồ sơ đã neo On-Chain",
       value: loading ? "..." : String(totalCases ?? 0).padStart(2, "0"),
-      note: "Verified on TrustRecoverRegistry (Fuji)",
+      note: "Xác thực trên TrustRecoverRegistry (Fuji)",
     },
     {
-      label: "Avalanche Network",
+      label: "Mạng Avalanche Fuji",
       value: "43113",
-      note: "Fuji C-Chain Testnet (Live RPC)",
+      note: "Fuji C-Chain Testnet (RPC trực tiếp)",
     },
     {
-      label: "AI Dispute Engine",
-      value: "3-Stage",
+      label: "Hệ thống AI điều tra",
+      value: "3 Tầng",
       note: "AskPay • DoubtStamp • LEGALMIND",
     },
     {
-      label: "Registry Contract",
+      label: "Hợp đồng lưu trữ v2",
       value: `${TRUSTRECOVER_REGISTRY_ADDRESS.slice(0, 6)}...${TRUSTRECOVER_REGISTRY_ADDRESS.slice(-4)}`,
-      note: "Auditable immutable storage",
+      note: "Lưu trữ kiểm toán bất biến",
     },
   ];
 
@@ -86,7 +86,7 @@ export default function OnChainStatsAndCases() {
         <div className="mb-4 flex flex-wrap items-center justify-between gap-2">
           <div>
             <h3 className="text-sm font-semibold text-white">
-              Recent On-Chain Anchored Cases (Avalanche Fuji)
+              Hồ sơ đã neo gần đây trên Avalanche Fuji
             </h3>
             <p className="text-xs text-slate-400">
               Dữ liệu đọc trực tiếp từ Smart Contract{" "}
