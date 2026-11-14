@@ -91,9 +91,9 @@ export default function Home() {
               </p>
             </div>
 
-            <button className="rounded-xl bg-cyan-400 px-5 py-3 text-sm font-semibold text-slate-950 transition hover:bg-cyan-300">
+            <a href="#workspace" className="inline-flex items-center rounded-xl bg-cyan-400 px-5 py-3 text-sm font-semibold text-slate-950 shadow-lg shadow-cyan-500/20 transition hover:bg-cyan-300">
               + New Dispute
-            </button>
+            </a>
           </header>
 
           <OnChainStatsAndCases />
@@ -156,8 +156,8 @@ export default function Home() {
             </div>
           </div>
 
-          <FujiTransactionVerifier />
-          <DisputeIntelligenceWorkspace />
+          <div id="verifier"><FujiTransactionVerifier /></div>
+          <div id="workspace"><DisputeIntelligenceWorkspace /></div>
           <footer className="mt-10 border-t border-white/10 pt-5 text-xs text-slate-600">
             TRUSTRECOVER © 2026 · AI-powered DeFi dispute intelligence
           </footer>

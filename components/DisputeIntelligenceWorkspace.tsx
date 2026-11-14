@@ -107,7 +107,7 @@ export default function DisputeIntelligenceWorkspace() {
   }
 
   return (
-    <div className="mt-10 rounded-3xl border border-cyan-500/20 bg-slate-950/80 p-6 text-slate-100 shadow-2xl backdrop-blur">
+    <div className="mt-10 rounded-3xl border border-cyan-500/25 bg-gradient-to-b from-slate-900/90 to-slate-950/95 p-6 text-slate-100 shadow-2xl shadow-cyan-950/30 backdrop-blur sm:p-8">
       {/* Header */}
       <div className="flex flex-wrap items-center justify-between gap-4 border-b border-white/10 pb-5">
         <div>
@@ -315,7 +315,7 @@ export default function DisputeIntelligenceWorkspace() {
                 <h3 className="text-sm font-bold text-emerald-300">
                   Verified Blockchain Facts (Dữ liệu gốc từ Fuji RPC)
                 </h3>
-                <span className="rounded bg-emerald-500/20 px-2 py-0.5 text-[10px] font-mono text-emerald-300">
+                <span className="shrink-0 whitespace-nowrap rounded-md bg-emerald-500/15 px-2.5 py-0.5 font-mono text-[10px] font-semibold text-emerald-300 ring-1 ring-emerald-500/30">
                   ON-CHAIN FACT
                 </span>
               </div>
@@ -388,11 +388,11 @@ export default function DisputeIntelligenceWorkspace() {
                 <h3 className="text-sm font-bold text-cyan-300">
                   AskPay – AI Transaction Intelligence
                 </h3>
-                <span className="rounded bg-cyan-500/20 px-2 py-0.5 text-[10px] font-mono text-cyan-300">
+                <span className="shrink-0 whitespace-nowrap rounded-md bg-cyan-500/15 px-2.5 py-0.5 font-mono text-[10px] font-semibold text-cyan-300 ring-1 ring-cyan-500/30">
                   AI ANALYSIS ({analysis.aiInvestigation.modelUsed})
                 </span>
               </div>
-              <div className="mt-3 space-y-2.5 text-xs text-slate-200">
+              <div className="mt-3 space-y-2.5 break-words text-xs leading-relaxed text-slate-200">
                 <p>
                   <strong className="text-white">Tóm tắt trạng thái: </strong>
                   {analysis.aiInvestigation.askPay.txStatusSummary}
