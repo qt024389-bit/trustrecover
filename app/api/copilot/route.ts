@@ -35,11 +35,34 @@ export async function POST(request: NextRequest) {
   }
 
   try {
-    const body = await request.json().catch(() => null);
-    const message = String(body?.message || "").trim();
-    if (!message) {
+    const contentType = request.headers.get("content-type") || "";
+    let message = "";
+    let imageBase64: string | null = null;
+    let imageMime = "image/png";
+
+    if (contentType.includes("multipart/form-data")) {
+      const formData = await request.formData();
+      message = String(formData.get("message") || "").trim();
+      const file = formData.get("image");
+      if (file instanceof File && file.size > 0) {
+        if (file.size > 5 * 1024 * 1024) {
+          return NextResponse.json(
+            { success: false, error: "Ảnh đính kèm không được vượt quá 5MB." },
+            { status: 400 }
+          );
+        }
+        const buf = Buffer.from(await file.arrayBuffer());
+        imageBase64 = buf.toString("base64");
+        imageMime = file.type || "image/png";
+      }
+    } else {
+      const body = await request.json().catch(() => null);
+      message = String(body?.message || "").trim();
+    }
+
+    if (!message && !imageBase64) {
       return NextResponse.json(
-        { success: false, error: "Vui lòng nhập yêu cầu của bạn." },
+        { success: false, error: "Vui lòng nhập yêu cầu hoặc đính kèm hình ảnh." },
         { status: 400 }
       );
     }
@@ -56,21 +79,29 @@ export async function POST(request: NextRequest) {
     const models = ["gemini-3.6-flash", "gemini-3.5-flash-lite", "gemini-3.1-flash-lite"];
 
     const systemInstruction = `
-Bạn là Trợ lý Điều hướng Thông minh (AI Copilot) của website TRUSTRECOVER (nền tảng điều tra tranh chấp DeFi trên Avalanche Fuji Testnet).
-Nhiệm vụ của bạn là đọc yêu cầu tự nhiên bằng tiếng Việt của người dùng (kể cả người mới chưa rành công nghệ), đưa họ đến đúng tab chức năng và tự động trích xuất thông tin điền sẵn vào form:
-- "dashboard": Xem tổng quan, số lượng hồ sơ đã neo, thao tác nhanh.
-- "cases": Xem danh sách hồ sơ đã neo on-chain, tra cứu ngược theo Case ID hoặc TxHash.
-- "analysis": Khi người dùng muốn khiếu nại, tố cáo lừa đảo, phân tích giao dịch tranh chấp, tải bằng chứng, hoặc chạy thử kịch bản mẫu (set loadDemo=true nếu họ muốn chạy thử/demo mà chưa có txHash).
-- "audit": Khi người dùng chỉ muốn kiểm tra nhanh 1 mã giao dịch (txHash) xem có thật trên Avalanche Fuji không, hoặc muốn kiểm chứng file báo cáo .json xem có bị giả mạo không.
-- "settings": Khi người dùng muốn xem cấu hình mạng, hoặc cấp/gỡ quyền Reviewer cho ví khác.
+Bạn là Trợ lý Điều hướng Thông minh (AI Copilot) của website TRUSTRECOVER trên Avalanche Fuji Testnet.
+Người dùng có thể nhập chữ, hoặc đính kèm hình ảnh (ảnh chụp ví, ảnh giao dịch, ảnh tin nhắn, ảnh lỗi) để yêu cầu bạn phân tích và thực hiện giúp.
+Hãy chọn đúng targetTab:
+- "dashboard": Xem tổng quan.
+- "cases": Xem hồ sơ đã neo on-chain, tra cứu ngược.
+- "analysis": Khiếu nại, phân tích tranh chấp, đọc bằng chứng từ ảnh/text, hoặc chạy kịch bản mẫu (loadDemo=true).
+- "audit": Kiểm tra nhanh mã giao dịch (txHash) trên Fuji hoặc kiểm chứng file báo cáo .json.
+- "settings": Xem cấu hình hoặc quản lý quyền Reviewer.
 
-Quy tắc trích xuất autoFill:
-- Nếu trong câu có chuỗi 0x dài 66 ký tự (txHash) -> điền vào txHash.
-- Nếu có địa chỉ ví 0x dài 42 ký tự -> điền vào claimedRecipient.
-- Nếu có số tiền AVAX (ví dụ 25.5 AVAX) -> điền số vào claimedAmountAvax (chỉ số, ví dụ "25.5").
-- Nếu người dùng mô tả sự việc bị lừa/tranh chấp -> tóm tắt thành userClaim rõ ràng để điền sẵn.
-- Trả lời ngắn gọn, thân thiện bằng tiếng Việt trong trường reply (1-2 câu), nói rõ bạn đã chuyển họ tới đâu và đã điền sẵn gì.
+Nếu có hình ảnh đính kèm:
+- Đọc kỹ mọi chữ, mã 0x (txHash 66 ký tự hoặc địa chỉ ví 42 ký tự), số tiền AVAX, và nội dung tranh chấp/lỗi trong ảnh.
+- Tự động điền các thông tin trích xuất được vào autoFill (txHash, claimedRecipient, claimedAmountAvax, userClaim).
+- Nếu ảnh là yêu cầu làm theo giao diện/hành động cụ thể, tóm tắt ngắn gọn trong reply (1-2 câu tiếng Việt) bạn đã đọc được gì từ ảnh và đã chuyển người dùng tới tab nào.
 `.trim();
+
+    const parts: Array<{ text: string } | { inlineData: { mimeType: string; data: string } }> = [
+      {
+        text: message || "Hãy đọc hình ảnh đính kèm này, trích xuất thông tin giao dịch/khiếu nại và đưa tôi đến chức năng phù hợp.",
+      },
+    ];
+    if (imageBase64) {
+      parts.push({ inlineData: { mimeType: imageMime, data: imageBase64 } });
+    }
 
     let responseText: string | undefined;
     for (const model of models) {
@@ -78,7 +109,7 @@ Quy tắc trích xuất autoFill:
         const res = await Promise.race([
           ai.models.generateContent({
             model,
-            contents: [{ role: "user", parts: [{ text: message }] }],
+            contents: [{ role: "user", parts }],
             config: {
               systemInstruction,
               responseMimeType: "application/json",
@@ -86,7 +117,7 @@ Quy tắc trích xuất autoFill:
               temperature: 0.1,
             },
           }),
-          new Promise<never>((_, rej) => setTimeout(() => rej(new Error("TIMEOUT")), 15000)),
+          new Promise<never>((_, rej) => setTimeout(() => rej(new Error("TIMEOUT")), 20000)),
         ]);
         responseText = res.text;
         if (responseText) break;

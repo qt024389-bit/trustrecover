@@ -109,6 +109,8 @@ export default function Home() {
             </div>
           </div>
 
+          <TrustRecoverCopilot onExecuteAction={handleCopilotAction} />
+
           <div className="m-6 mt-0 rounded-2xl border border-slate-200 bg-slate-50 p-4">
             <p className="text-[11px] font-bold uppercase tracking-wider text-slate-500">
               TRẠNG THÁI MẠNG
@@ -148,7 +150,7 @@ export default function Home() {
               </button>
             </header>
 
-            <TrustRecoverCopilot onExecuteAction={handleCopilotAction} />
+      
 
             {/* TAB 1: TONG QUAN */}
             <div className={activeTab === "dashboard" ? "block space-y-8" : "hidden"}>
