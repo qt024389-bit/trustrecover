@@ -6,6 +6,7 @@ import DisputeIntelligenceWorkspace from "@/components/DisputeIntelligenceWorksp
 import FujiTransactionVerifier from "@/components/FujiTransactionVerifier";
 import OnChainStatsAndCases from "@/components/OnChainStatsAndCases";
 import ReviewerManagerPanel from "@/components/ReviewerManagerPanel";
+import ReportIntegrityVerifier from "@/components/ReportIntegrityVerifier";
 import {
   SNOWTRACE_FUJI_URL,
   TRUSTRECOVER_FUJI_CHAIN_ID,
@@ -240,6 +241,7 @@ export default function Home() {
                   {TRUSTRECOVER_REGISTRY_ADDRESS} ↗
                 </a>
               </div>
+              <ReportIntegrityVerifier />
               <FujiTransactionVerifier />
             </div>
 

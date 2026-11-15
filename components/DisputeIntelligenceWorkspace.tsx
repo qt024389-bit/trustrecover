@@ -450,6 +450,32 @@ export default function DisputeIntelligenceWorkspace() {
                     {analysis.onChainVerification.txData.receipt.gasUsed} gas •{" "}
                     {analysis.onChainVerification.txData.receipt.logsCount} event logs
                   </div>
+                  {analysis.onChainVerification.txData.recipientProfile && (
+                    <div className="mt-2 rounded-lg border border-white/10 bg-slate-950/60 p-2.5 text-[11px]">
+                      <span className="text-slate-400">Phân loại đích (Address Profiling): </span>
+                      <span className="font-semibold text-cyan-300">
+                        {analysis.onChainVerification.txData.recipientProfile.isContract
+                          ? "Smart Contract (Hợp đồng thông minh)"
+                          : "EOA (Ví người dùng thông thường)"}
+                      </span>
+                      <span className="text-slate-400">
+                        {" "}• Số dư hiện tại: {Number(analysis.onChainVerification.txData.recipientProfile.balanceAvax).toFixed(4)} AVAX
+                      </span>
+                    </div>
+                  )}
+
+                  {analysis.onChainVerification.txData.receipt.logs.some((l) => l.decodedEvent) && (
+                    <div className="mt-2 rounded-lg border border-cyan-500/20 bg-cyan-950/20 p-2.5 text-[11px]">
+                      <div className="font-semibold text-cyan-300">Sự kiện ERC-20 đã giải mã:</div>
+                      {analysis.onChainVerification.txData.receipt.logs
+                        .filter((l) => l.decodedEvent)
+                        .map((l, idx) => (
+                          <div key={idx} className="mt-1 break-all text-slate-300">
+                            • {l.decodedEvent?.name}: {JSON.stringify(l.decodedEvent?.args)}
+                          </div>
+                        ))}
+                    </div>
+                  )}
                 </div>
               ) : (
                 <p className="mt-3 text-xs text-rose-300">
