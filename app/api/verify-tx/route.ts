@@ -36,7 +36,8 @@ export async function POST(request: NextRequest) {
     }
 
     const result = await verifyFujiTransaction(
-      (body as { txHash?: unknown }).txHash
+      (body as { txHash?: unknown; network?: unknown }).txHash,
+      (body as { network?: unknown }).network
     );
 
     if (!result.success) {
@@ -64,7 +65,7 @@ export async function POST(request: NextRequest) {
 
 export async function GET(request: NextRequest) {
   const txHash = request.nextUrl.searchParams.get("txHash");
-  const result = await verifyFujiTransaction(txHash);
+  const result = await verifyFujiTransaction(txHash, request.nextUrl.searchParams.get("network"));
 
   if (!result.success) {
     return NextResponse.json(result, {
