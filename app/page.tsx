@@ -73,9 +73,9 @@ export default function Home() {
 
   return (
     <main className="min-h-screen overflow-x-hidden bg-[#080d18] text-white">
-      <div className="mx-auto flex min-h-screen max-w-[1440px] flex-col lg:flex-row">
+      <div className="mx-auto flex min-h-screen max-w-[1440px] flex-col lg:h-screen lg:flex-row lg:overflow-hidden">
         {/* Sidebar ben trai: Phan Logo hoa lien mach, Khong gian lam viec nen trang */}
-        <aside className="flex w-full shrink-0 flex-col justify-between border-b border-slate-200 bg-white text-slate-900 lg:w-72 lg:border-b-0 lg:border-r">
+        <aside className="flex w-full shrink-0 flex-col justify-between border-b border-slate-200 bg-white text-slate-900 lg:h-full lg:w-72 lg:overflow-y-auto lg:border-b-0 lg:border-r">
           <div>
             <div className="border-b border-slate-100 px-6 pt-6 pb-5">
               <TrustRecoverLogo />
@@ -127,7 +127,7 @@ export default function Home() {
         </aside>
 
         {/* Main Content Area: Nen toi Dark Navy diu mat */}
-        <section className="flex min-w-0 flex-1 flex-col justify-between bg-[#080d18] p-6 text-white lg:p-8">
+        <section className="flex min-w-0 flex-1 flex-col justify-between bg-[#080d18] p-6 text-white lg:h-full lg:overflow-y-auto lg:p-8">
           <div>
             <header className="mb-8 flex flex-wrap items-center justify-between gap-4 border-b border-white/10 pb-6">
               <div>
