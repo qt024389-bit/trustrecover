@@ -1,29 +1,23 @@
-# TRUSTRECOVER — AI-Powered DeFi Dispute Intelligence & Recovery
+# TRUSTRECOVER — AI-Powered DeFi Dispute Intelligence & Recovery (Avalanche UniHack 2026)
 
-Built for **Avalanche Team1 Vietnam UniHack 2026**.
+> **AI investigates • Evidence is verified • Avalanche anchors an auditable case history • Human reviewers validate outcomes.**
 
-- **Live Demo**: https://trustrecover.vercel.app
+- **Live Web App:** https://trustrecover.vercel.app
+- **Registry v2 Contract (Avalanche Fuji 43113):** [`0xccED09099039A707fc5bda1274E647aC297B9D5F`](https://testnet.snowtrace.io/address/0xccED09099039A707fc5bda1274E647aC297B9D5F)
+- **Arbitration Contract (Avalanche Fuji 43113):** [`0xCc8E3699Bb55265f849bBC7120353ADbEed74EC1`](https://testnet.snowtrace.io/address/0xCc8E3699Bb55265f849bBC7120353ADbEed74EC1)
 
-> **Core Principles**: AI investigates • Evidence is verified • Avalanche anchors an auditable case history • Human reviewers validate outcomes.
+## Core Architecture
+1. **AskPay (Multi-Chain Avalanche Intelligence):** Queries live RPCs for **Avalanche Fuji C-Chain (`43113`)** and **Dispatch L1 Testnet (`779672`)**. Resolves Verified ABIs via Routescan API + proxy fallback (`transfer`, `approve`, `deposit`, `withdraw`), ERC-20 logs, and Avalanche Warp Messaging (`SendWarpMessage`).
+2. **DoubtStamp (Multimodal Evidence & Anti-Tamper):** Supports up to 5 files (`<= 5MB`: TXT, JSON, CSV, MD, LOG, PDF, PNG, JPG, WEBP), computes SHA-256 file commitment hashes, and flags `VERIFIED`, `CONTRADICTED`, `INSUFFICIENT`, or `UNVERIFIABLE`.
+3. **LEGALMIND (Recovery Guidance & Guardrails):** Generates prioritized investigative steps and missing-evidence checklists while enforcing strict legal/technical disclaimers (never promises fund recovery or blockchain reversal).
+4. **Cross-Engine Consistency Check & Recovery Readiness Score:** Server-side deterministic verification with hard score caps (`<= 25/100` if no verified on-chain tx; `<= 40/100` if `CONTRADICTED` findings exist).
+5. **On-Chain Arbitration & Registry:** Combines `TrustRecoverRegistry` v2 (`keccak256` anti-tamper report anchoring) and `TrustRecoverArbitration` (`0.01 AVAX` anti-spam stake, `onlyReviewer` voting, and automated `releaseStake`).
 
-## Architecture & Modules
-1. **Avalanche Fuji Verification Engine (`lib/avalanche/verifyTransaction.ts`)**:
-   - Connects directly to Avalanche Fuji Testnet (Chain ID `43113`) via `ethers.js` v6 RPC.
-   - Reads real transaction receipts, status, block numbers, gas usage, and decodes ERC-20 (`Transfer`, `Approval`) event logs.
-2. **Unified AI Dispute Pipeline (`lib/dispute/geminiPipeline.ts`)**:
-   - **AskPay (Transaction Intelligence)**: Explains verified on-chain facts and flags unverified claims.
-   - **DoubtStamp (Evidence Consistency Analysis)**: Cross-checks user claims and uploaded evidence (including multimodal images/PDFs and SHA-256 commitment hashes) against real Fuji on-chain data, classifying findings as `VERIFIED`, `CONTRADICTED`, `INSUFFICIENT`, or `UNVERIFIABLE`.
-   - **LEGALMIND (Recovery Intelligence)**: Produces prioritized technical checklists, missing-evidence steps, and legal reference scopes with mandatory disclaimers (never promises fund recovery or blockchain reversal).
-3. **Immutable Audit Trail on Avalanche Fuji (`contracts/TrustRecoverRegistry.sol`)**:
-   - Deployed Contract Address (Fuji Testnet): [`0xccED09099039A707fc5bda1274E647aC297B9D5F`](https://testnet.snowtrace.io/address/0xccED09099039A707fc5bda1274E647aC297B9D5F)
-   - Human Reviewers sign via MetaMask/Core Wallet to anchor `caseId`, `txHash`, `reportHash`, and `verdict` on-chain.
+## Verified On-Chain Proof (Arbitration Full Flow: `TR-MWI3OZZN`)
+- **Submit & Lock `0.01 AVAX`:** `0xc75d353848b9d4c5191395062eb8b3276c637b283818f3a6b6f7bcfc2bd9d9cb`
+- **Reviewer Vote & Finalize:** `0xb2501fe28add22d73b48b1815a9fd90af37ba0ab173ba93bcc8dd27d8f84c655`
+- **Release Stake:** `0x6354fe4f726d8af1c2c3a09564662c8036a2f92a70e207f439e002adf0538084`
 
-## Local Setup
-1. Install dependencies: `npm install`
-2. Create `.env.local` (never commit):
-   - `AVALANCHE_FUJI_RPC_URL=[https://api.avax-test.network/ext/bc/C/rpc](https://api.avax-test.network/ext/bc/C/rpc)`
-   - `AVALANCHE_FUJI_CHAIN_ID=43113`
-   - `GEMINI_API_KEY=your_gemini_api_key`
-   - `GEMINI_MODEL=gemini-3.6-flash`
-3. Run development server: `npm run dev`
-4. Run automated API tests (while dev server is running): `node scripts/test-api.mjs`
+## Automated Testing
+- `node scripts/test-api.mjs` — API validation & RPC checks (`5/5 PASS`)
+- `node scripts/benchmark-ai.mjs` — AI Accuracy, Multi-Chain L1 & Prompt Injection resistance (`5/5 PASS`)
