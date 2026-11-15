@@ -1,36 +1,35 @@
 import { Interface, JsonRpcProvider, formatEther } from "ethers";
+import { resolveAvalancheNetwork, type AvalancheNetworkConfig } from "./networks";
+import { VerifyTransactionResult, TransactionLogItem } from "./types";
 
 const ERC20_IFACE = new Interface([
   "event Transfer(address indexed from, address indexed to, uint256 value)",
   "event Approval(address indexed owner, address indexed spender, uint256 value)",
 ]);
-import {
-  VerifyTransactionResult,
-  TransactionLogItem,
-} from "./types";
 
-const FUJI_CHAIN_ID = 43113;
+const AWM_IFACE = new Interface([
+  "event SendWarpMessage(address indexed sender, bytes32 indexed messageID, bytes message)",
+]);
+
 const TX_HASH_REGEX = /^0x([A-Fa-f0-9]{64})$/;
 
 export function isValidTxHash(txHash: unknown): txHash is string {
   return typeof txHash === "string" && TX_HASH_REGEX.test(txHash.trim());
 }
 
-function getFujiProvider(): JsonRpcProvider {
-  const rpcUrl =
-    process.env.AVALANCHE_FUJI_RPC_URL ||
-    "https://api.avax-test.network/ext/bc/C/rpc";
-
-  return new JsonRpcProvider(rpcUrl, {
-    chainId: FUJI_CHAIN_ID,
-    name: "avalanche-fuji",
+function getAvalancheProvider(cfg: AvalancheNetworkConfig): JsonRpcProvider {
+  return new JsonRpcProvider(cfg.rpcUrl, {
+    chainId: cfg.chainId,
+    name: cfg.id,
   });
 }
 
 export async function verifyFujiTransaction(
-  rawTxHash: unknown
+  rawTxHash: unknown,
+  rawNetwork?: unknown
 ): Promise<VerifyTransactionResult> {
   const queriedAt = new Date().toISOString();
+  const cfg = resolveAvalancheNetwork(rawNetwork);
 
   if (!isValidTxHash(rawTxHash)) {
     return {
@@ -48,16 +47,16 @@ export async function verifyFujiTransaction(
   const txHash = rawTxHash.trim();
 
   try {
-    const provider = getFujiProvider();
-
+    const provider = getAvalancheProvider(cfg);
     const network = await provider.getNetwork();
-    if (Number(network.chainId) !== FUJI_CHAIN_ID) {
+
+    if (Number(network.chainId) !== cfg.chainId) {
       return {
         success: false,
         verifiedOnChain: false,
         error: {
           code: "CHAIN_MISMATCH",
-          message: `Chain ID từ RPC (${network.chainId.toString()}) không khớp với Avalanche Fuji Testnet (${FUJI_CHAIN_ID}).`,
+          message: `Chain ID từ RPC (${network.chainId.toString()}) không khớp với ${cfg.name} (${cfg.chainId}).`,
         },
         queriedAt,
       };
@@ -74,8 +73,7 @@ export async function verifyFujiTransaction(
         verifiedOnChain: false,
         error: {
           code: "TX_NOT_FOUND",
-          message:
-            "Không tìm thấy giao dịch này trên Avalanche Fuji Testnet (Chain ID 43113).",
+          message: `Không tìm thấy giao dịch này trên ${cfg.name} (Chain ID ${cfg.chainId}).`,
         },
         queriedAt,
       };
@@ -84,20 +82,23 @@ export async function verifyFujiTransaction(
     const logs: TransactionLogItem[] = receipt
       ? receipt.logs.map((log) => {
           let decodedEvent: { name: string; args: Record<string, string> } | undefined;
-          try {
-            const parsed = ERC20_IFACE.parseLog({
-              topics: [...log.topics],
-              data: log.data,
-            });
-            if (parsed) {
-              const args: Record<string, string> = {};
-              parsed.fragment.inputs.forEach((input, idx) => {
-                args[input.name || `arg${idx}`] = String(parsed.args[idx]);
+          for (const iface of [ERC20_IFACE, AWM_IFACE]) {
+            try {
+              const parsed = iface.parseLog({
+                topics: [...log.topics],
+                data: log.data,
               });
-              decodedEvent = { name: parsed.name, args };
+              if (parsed) {
+                const args: Record<string, string> = {};
+                parsed.fragment.inputs.forEach((input, idx) => {
+                  args[input.name || `arg${idx}`] = String(parsed.args[idx]);
+                });
+                decodedEvent = { name: parsed.name, args };
+                break;
+              }
+            } catch {
+              // Ignore non-matching log
             }
-          } catch {
-            // Non-ERC20 log
           }
           return {
             logIndex: log.index,
@@ -143,8 +144,8 @@ export async function verifyFujiTransaction(
       data: {
         verifiedOnChain: true,
         network: {
-          name: "Avalanche Fuji Testnet",
-          chainId: FUJI_CHAIN_ID,
+          name: cfg.name,
+          chainId: cfg.chainId,
         },
         transaction: {
           hash: tx.hash,
@@ -175,13 +176,12 @@ export async function verifyFujiTransaction(
   } catch (err: unknown) {
     const rawMessage =
       err instanceof Error ? err.message : "Lỗi không xác định khi gọi RPC";
-
     return {
       success: false,
       verifiedOnChain: false,
       error: {
         code: "RPC_ERROR",
-        message: `Không thể kết nối hoặc truy vấn Avalanche Fuji RPC: ${rawMessage.replace(
+        message: `Không thể kết nối hoặc truy vấn ${cfg.name} RPC: ${rawMessage.replace(
           /https?:\/\/[^\s]+/g,
           "[REDACTED_RPC_URL]"
         )}`,
@@ -190,3 +190,5 @@ export async function verifyFujiTransaction(
     };
   }
 }
+
+export const verifyAvalancheTransaction = verifyFujiTransaction;

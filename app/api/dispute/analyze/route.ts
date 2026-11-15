@@ -16,6 +16,7 @@ export async function POST(request: NextRequest) {
     let userClaim = "";
     let claimedAmountAvax = "";
     let claimedRecipient = "";
+    let network = "fuji";
     let evidenceFiles: EvidenceFileMeta[] = [];
 
     if (contentType.includes("multipart/form-data")) {
@@ -24,6 +25,7 @@ export async function POST(request: NextRequest) {
       userClaim = String(formData.get("userClaim") || "").trim();
       claimedAmountAvax = String(formData.get("claimedAmountAvax") || "").trim();
       claimedRecipient = String(formData.get("claimedRecipient") || "").trim();
+      network = String(formData.get("network") || "fuji").trim();
 
       const rawFiles = formData
         .getAll("evidenceFiles")
@@ -61,6 +63,7 @@ export async function POST(request: NextRequest) {
       userClaim = String(body.userClaim || "").trim();
       claimedAmountAvax = String(body.claimedAmountAvax || "").trim();
       claimedRecipient = String(body.claimedRecipient || "").trim();
+      network = String(body.network || "fuji").trim();
     }
 
     if (!txHash) {
@@ -95,6 +98,7 @@ export async function POST(request: NextRequest) {
       userClaim,
       claimedAmountAvax: claimedAmountAvax || undefined,
       claimedRecipient: claimedRecipient || undefined,
+      network,
       evidenceFiles,
     });
 

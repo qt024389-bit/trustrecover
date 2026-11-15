@@ -12,6 +12,7 @@ export default function FujiTransactionVerifier({
   prefillTxHash?: { nonce: number; txHash: string } | null;
 }) {
   const [txHash, setTxHash] = useState("");
+  const [network, setNetwork] = useState<"fuji" | "dispatch">("fuji");
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<VerifyTransactionResult | null>(null);
 
@@ -30,7 +31,7 @@ export default function FujiTransactionVerifier({
       const response = await fetch("/api/verify-tx", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ txHash }),
+        body: JSON.stringify({ txHash, network }),
       });
       const data: VerifyTransactionResult = await response.json();
       setResult(data);
@@ -73,6 +74,14 @@ export default function FujiTransactionVerifier({
       </div>
 
       <form onSubmit={handleVerify} className="mt-4 flex flex-col gap-3 sm:flex-row">
+        <select
+          value={network}
+          onChange={(e) => setNetwork(e.target.value as "fuji" | "dispatch")}
+          className="rounded-xl border border-white/10 bg-slate-950/80 px-3 py-2.5 text-xs text-slate-100 focus:border-emerald-500 focus:outline-none"
+        >
+          <option value="fuji">Fuji C-Chain (43113)</option>
+          <option value="dispatch">Dispatch L1 (779672)</option>
+        </select>
         <input
           type="text"
           value={txHash}

@@ -170,6 +170,7 @@ export interface RunDisputePipelineParams {
   claimedAmountAvax?: string;
   claimedRecipient?: string;
   evidenceFiles: EvidenceFileMeta[];
+  network?: string;
 }
 
 export async function runDisputeIntelligencePipeline(
@@ -187,7 +188,7 @@ export async function runDisputeIntelligencePipeline(
   const caseId = `TR-${Date.now().toString(36).toUpperCase()}`;
 
   // 1. Verify on-chain transaction via existing Avalanche Fuji engine
-  const txResult = await verifyFujiTransaction(params.txHash);
+  const txResult = await verifyFujiTransaction(params.txHash, params.network);
   auditHistory.push({
     timestamp: new Date().toISOString(),
     actor: "SYSTEM_AVALANCHE_RPC",
