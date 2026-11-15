@@ -186,7 +186,7 @@ export default function DisputeIntelligenceWorkspace({
   }
 
   return (
-    <div className="mt-4 w-full max-w-full overflow-hidden rounded-3xl border border-cyan-500/25 bg-gradient-to-b from-slate-900/90 to-slate-950/95 p-5 text-slate-100 shadow-2xl shadow-cyan-950/30 backdrop-blur sm:p-8">
+    <div className="mt-4 w-full max-w-full overflow-hidden [overflow-wrap:anywhere] rounded-3xl border border-cyan-500/25 bg-gradient-to-b from-slate-900/90 to-slate-950/95 p-5 text-slate-100 shadow-2xl shadow-cyan-950/30 backdrop-blur sm:p-8">
       {/* Header */}
       <div className="flex flex-wrap items-center justify-between gap-4 border-b border-white/10 pb-5">
         <div>
@@ -663,7 +663,7 @@ export default function DisputeIntelligenceWorkspace({
 
             {/* Contradictions & Missing Evidence */}
             <div className="mt-5 grid grid-cols-1 gap-4 md:grid-cols-2">
-              <div className="rounded-xl border border-rose-500/30 bg-rose-950/20 p-4">
+              <div className="min-w-0 overflow-hidden rounded-xl border border-rose-500/30 bg-rose-950/20 p-4">
                 <h4 className="text-xs font-bold text-rose-300">
                   Điểm mâu thuẫn phát hiện
                 </h4>
@@ -682,7 +682,7 @@ export default function DisputeIntelligenceWorkspace({
                 )}
               </div>
 
-              <div className="rounded-xl border border-amber-500/30 bg-amber-950/20 p-4">
+              <div className="min-w-0 overflow-hidden rounded-xl border border-amber-500/30 bg-amber-950/20 p-4">
                 <h4 className="text-xs font-bold text-amber-300">
                   Bằng chứng còn thiếu
                 </h4>
@@ -710,7 +710,7 @@ export default function DisputeIntelligenceWorkspace({
               {analysis.aiInvestigation.legalMind.disputeChecklist.map((step) => (
                 <div
                   key={step.step}
-                  className="rounded-xl border border-white/10 bg-slate-950/70 p-3.5 text-xs"
+                  className="min-w-0 overflow-hidden rounded-xl border border-white/10 bg-slate-950/70 p-3.5 text-xs"
                 >
                   <div className="flex flex-wrap items-center justify-between gap-2">
                     <span className="font-bold text-white">
@@ -726,7 +726,7 @@ export default function DisputeIntelligenceWorkspace({
             </div>
 
             <div className="mt-4 grid grid-cols-1 gap-4 md:grid-cols-2">
-              <div className="rounded-xl border border-white/10 bg-slate-950/50 p-3.5 text-xs">
+              <div className="min-w-0 overflow-hidden rounded-xl border border-white/10 bg-slate-950/50 p-3.5 text-xs">
                 <div className="font-semibold text-white">
                   Phân biệt Hướng dẫn Kỹ thuật & Thông tin Pháp lý:
                 </div>
@@ -734,7 +734,7 @@ export default function DisputeIntelligenceWorkspace({
                   {analysis.aiInvestigation.legalMind.technicalVsLegalDistinction}
                 </p>
               </div>
-              <div className="rounded-xl border border-white/10 bg-slate-950/50 p-3.5 text-xs">
+              <div className="min-w-0 overflow-hidden rounded-xl border border-white/10 bg-slate-950/50 p-3.5 text-xs">
                 <div className="font-semibold text-white">
                   Tham chiếu quy định & Phạm vi áp dụng:
                 </div>
