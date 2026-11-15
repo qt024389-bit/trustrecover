@@ -23,7 +23,7 @@ const QUICK_PROMPTS = [
   "Xem danh sách hồ sơ đã neo trên Avalanche Fuji",
 ];
 
-function HeronLogoIcon({ size = 22 }: { size?: number }) {
+function HeronLogoIcon({ size = 26 }: { size?: number }) {
   return (
     <svg
       width={size}
@@ -62,13 +62,12 @@ export default function TrustRecoverCopilot({
 }: TrustRecoverCopilotProps) {
   const [open, setOpen] = useState(false);
   const [input, setInput] = useState("");
-  const [imageFile, setImageFile] = useState<File | null>(null);
+  const [attachedFile, setAttachedFile] = useState<File | null>(null);
   const [loading, setLoading] = useState(false);
   const [reply, setReply] = useState<string | null>(
-    "Xin chào! Bạn có thể nhập yêu cầu hoặc gửi ảnh chụp giao dịch, mình sẽ đưa bạn tới đúng chức năng và điền sẵn dữ liệu."
+    "Xin chào! Bạn có thể nhập yêu cầu, đính kèm ảnh hoặc tệp (.pdf, .json, .txt, .csv), mình sẽ đưa bạn tới đúng chức năng và điền sẵn dữ liệu."
   );
 
-  // Vi tri keo tha (mac dinh goc duoi ben phai, tu cap nhat khi mount)
   const [pos, setPos] = useState<{ x: number; y: number } | null>(null);
   const draggingRef = useRef(false);
   const movedRef = useRef(false);
@@ -77,8 +76,8 @@ export default function TrustRecoverCopilot({
 
   useEffect(() => {
     setPos({
-      x: Math.max(16, window.innerWidth - 260),
-      y: Math.max(16, window.innerHeight - 76),
+      x: 28,
+      y: Math.max(20, window.innerHeight - 190),
     });
   }, []);
 
@@ -104,8 +103,8 @@ export default function TrustRecoverCopilot({
   function handlePointerMove(e: PointerEvent) {
     if (!draggingRef.current) return;
     movedRef.current = true;
-    const width = containerRef.current?.offsetWidth || 240;
-    const height = containerRef.current?.offsetHeight || 56;
+    const width = containerRef.current?.offsetWidth || 64;
+    const height = containerRef.current?.offsetHeight || 64;
     const maxX = Math.max(12, window.innerWidth - width - 12);
     const maxY = Math.max(12, window.innerHeight - height - 12);
     setPos({
@@ -122,16 +121,16 @@ export default function TrustRecoverCopilot({
 
   async function sendPrompt(textToSend: string, fileToSend?: File | null) {
     const q = textToSend.trim();
-    const img = fileToSend ?? imageFile;
-    if ((!q && !img) || loading) return;
+    const f = fileToSend === undefined ? attachedFile : fileToSend;
+    if ((!q && !f) || loading) return;
     setLoading(true);
     setReply(null);
 
     try {
       const formData = new FormData();
       formData.append("message", q);
-      if (img) {
-        formData.append("image", img);
+      if (f) {
+        formData.append("file", f);
       }
 
       const res = await fetch("/api/copilot", {
@@ -148,7 +147,7 @@ export default function TrustRecoverCopilot({
           autoFill: json.data.autoFill,
         });
         setInput("");
-        setImageFile(null);
+        setAttachedFile(null);
       }
     } catch {
       setReply("Lỗi kết nối tới Trợ lý AI.");
@@ -159,15 +158,25 @@ export default function TrustRecoverCopilot({
 
   if (!pos) return null;
 
+  const isLeftSide =
+    typeof window !== "undefined" ? pos.x < window.innerWidth / 2 : true;
+  const isTopSide =
+    typeof window !== "undefined" ? pos.y < window.innerHeight / 2 : false;
+
   return (
     <div
       ref={containerRef}
       style={{ left: pos.x, top: pos.y }}
-      className="fixed z-50 flex flex-col items-end select-none"
+      className={`fixed z-50 flex select-none ${
+        isTopSide ? "flex-col-reverse" : "flex-col"
+      } ${isLeftSide ? "items-start" : "items-end"}`}
     >
       {open && (
-        <div className="mb-3 w-[350px] max-w-[calc(100vw-2rem)] overflow-hidden rounded-2xl border border-slate-200 bg-white text-slate-900 shadow-2xl">
-          {/* Thanh tieu de co the nhan giu de keo tha */}
+        <div
+          className={`${
+            isTopSide ? "mt-3" : "mb-3"
+          } w-[350px] max-w-[calc(100vw-2rem)] overflow-hidden rounded-2xl border border-slate-200 bg-white text-slate-900 shadow-2xl`}
+        >
           <div
             onPointerDown={onPointerDownDrag}
             title="Nhấn giữ chuột để kéo Trợ lý sang vị trí khác"
@@ -182,7 +191,7 @@ export default function TrustRecoverCopilot({
                   Trợ lý AI TrustRecover
                 </div>
                 <div className="text-[10px] text-slate-500">
-                  Giữ thanh này để kéo • Tự mở & điền form
+                  Giữ thanh này để kéo • Đọc ảnh/tệp & tự điền
                 </div>
               </div>
             </div>
@@ -230,17 +239,21 @@ export default function TrustRecoverCopilot({
                 rows={2}
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
-                placeholder="Nhập việc bạn muốn làm hoặc gửi kèm ảnh..."
+                placeholder="Nhập việc bạn muốn làm hoặc đính kèm tệp/ảnh..."
                 className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs text-slate-900 placeholder-slate-400 focus:border-cyan-600 focus:outline-none"
               />
               <div className="flex items-center justify-between gap-2">
                 <label className="cursor-pointer truncate rounded-lg border border-slate-200 bg-slate-50 px-2.5 py-1.5 text-[11px] font-medium text-slate-700 hover:bg-slate-100">
-                  <span>{imageFile ? `🖼 ${imageFile.name}` : "+ Đưa ảnh vào"}</span>
+                  <span>
+                    {attachedFile
+                      ? `📎 ${attachedFile.name}`
+                      : "+ Tải tệp / ảnh"}
+                  </span>
                   <input
                     type="file"
-                    accept="image/*"
+                    accept="image/*,.pdf,.txt,.json,.csv,.md,.log"
                     className="hidden"
-                    onChange={(e) => setImageFile(e.target.files?.[0] || null)}
+                    onChange={(e) => setAttachedFile(e.target.files?.[0] || null)}
                   />
                 </label>
 
@@ -257,18 +270,19 @@ export default function TrustRecoverCopilot({
         </div>
       )}
 
-      {/* Nut tron bay theo trang web: Keo tha duoc + Bam de Mo/Thu gon */}
-      <div
+      {/* Nut tron Icon Logo bay theo trang web (khong can chu) */}
+      <button
+        type="button"
         onPointerDown={startDrag}
         onClick={() => {
           if (!movedRef.current) setOpen((v) => !v);
         }}
         title="Bấm để mở/thu gọn hoặc nhấn giữ chuột để kéo"
-        className="flex cursor-grab items-center gap-2.5 rounded-full border border-slate-200 bg-white px-4 py-2.5 text-xs font-extrabold text-slate-900 shadow-xl transition hover:border-cyan-500/50 hover:shadow-2xl active:cursor-grabbing"
+        aria-label="Mở Trợ lý AI TrustRecover"
+        className="flex h-13 w-13 cursor-grab items-center justify-center rounded-full border border-slate-200 bg-white shadow-xl transition hover:scale-105 hover:border-cyan-500/50 hover:shadow-2xl active:cursor-grabbing"
       >
-        <HeronLogoIcon size={22} />
-        <span>{open ? "Thu gọn Trợ lý" : "Trợ lý AI TrustRecover"}</span>
-      </div>
+        <HeronLogoIcon size={28} />
+      </button>
     </div>
   );
 }

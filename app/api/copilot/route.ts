@@ -37,32 +37,46 @@ export async function POST(request: NextRequest) {
   try {
     const contentType = request.headers.get("content-type") || "";
     let message = "";
-    let imageBase64: string | null = null;
-    let imageMime = "image/png";
+    let fileBase64: string | null = null;
+    let fileMime = "image/png";
+    let extractedFileText: string | null = null;
+    let attachedFileName: string | null = null;
 
     if (contentType.includes("multipart/form-data")) {
       const formData = await request.formData();
       message = String(formData.get("message") || "").trim();
-      const file = formData.get("image");
-      if (file instanceof File && file.size > 0) {
-        if (file.size > 5 * 1024 * 1024) {
+      const rawFile = formData.get("file") || formData.get("image");
+      if (rawFile instanceof File && rawFile.size > 0) {
+        if (rawFile.size > 5 * 1024 * 1024) {
           return NextResponse.json(
-            { success: false, error: "Ảnh đính kèm không được vượt quá 5MB." },
+            { success: false, error: "Tệp đính kèm không được vượt quá 5MB." },
             { status: 400 }
           );
         }
-        const buf = Buffer.from(await file.arrayBuffer());
-        imageBase64 = buf.toString("base64");
-        imageMime = file.type || "image/png";
+        attachedFileName = rawFile.name;
+        const buf = Buffer.from(await rawFile.arrayBuffer());
+        const mime = rawFile.type || "";
+        if (
+          mime.startsWith("image/") ||
+          mime === "application/pdf" ||
+          /\.(png|jpg|jpeg|webp|pdf)$/i.test(rawFile.name)
+        ) {
+          fileBase64 = buf.toString("base64");
+          fileMime =
+            mime ||
+            (/\.pdf$/i.test(rawFile.name) ? "application/pdf" : "image/png");
+        } else {
+          extractedFileText = buf.toString("utf-8").slice(0, 3000);
+        }
       }
     } else {
       const body = await request.json().catch(() => null);
       message = String(body?.message || "").trim();
     }
 
-    if (!message && !imageBase64) {
+    if (!message && !fileBase64 && !extractedFileText) {
       return NextResponse.json(
-        { success: false, error: "Vui lòng nhập yêu cầu hoặc đính kèm hình ảnh." },
+        { success: false, error: "Vui lòng nhập yêu cầu hoặc đính kèm tệp/ảnh." },
         { status: 400 }
       );
     }
@@ -80,27 +94,32 @@ export async function POST(request: NextRequest) {
 
     const systemInstruction = `
 Bạn là Trợ lý Điều hướng Thông minh (AI Copilot) của website TRUSTRECOVER trên Avalanche Fuji Testnet.
-Người dùng có thể nhập chữ, hoặc đính kèm hình ảnh (ảnh chụp ví, ảnh giao dịch, ảnh tin nhắn, ảnh lỗi) để yêu cầu bạn phân tích và thực hiện giúp.
+Người dùng có thể nhập chữ hoặc đính kèm hình ảnh/PDF/tệp văn bản (JSON, TXT, CSV, LOG) để yêu cầu bạn phân tích và thực hiện giúp.
 Hãy chọn đúng targetTab:
 - "dashboard": Xem tổng quan.
 - "cases": Xem hồ sơ đã neo on-chain, tra cứu ngược.
-- "analysis": Khiếu nại, phân tích tranh chấp, đọc bằng chứng từ ảnh/text, hoặc chạy kịch bản mẫu (loadDemo=true).
+- "analysis": Khiếu nại, phân tích tranh chấp, đọc bằng chứng từ ảnh/tệp, hoặc chạy kịch bản mẫu (loadDemo=true).
 - "audit": Kiểm tra nhanh mã giao dịch (txHash) trên Fuji hoặc kiểm chứng file báo cáo .json.
 - "settings": Xem cấu hình hoặc quản lý quyền Reviewer.
 
-Nếu có hình ảnh đính kèm:
-- Đọc kỹ mọi chữ, mã 0x (txHash 66 ký tự hoặc địa chỉ ví 42 ký tự), số tiền AVAX, và nội dung tranh chấp/lỗi trong ảnh.
+Nếu có tệp hoặc hình ảnh đính kèm:
+- Đọc kỹ mọi chữ, mã 0x (txHash 66 ký tự hoặc địa chỉ ví 42 ký tự), số tiền AVAX, và nội dung trong tệp/ảnh.
 - Tự động điền các thông tin trích xuất được vào autoFill (txHash, claimedRecipient, claimedAmountAvax, userClaim).
-- Nếu ảnh là yêu cầu làm theo giao diện/hành động cụ thể, tóm tắt ngắn gọn trong reply (1-2 câu tiếng Việt) bạn đã đọc được gì từ ảnh và đã chuyển người dùng tới tab nào.
+- Trả lời ngắn gọn (1-2 câu tiếng Việt) bạn đã đọc được gì và đã chuyển người dùng tới tab nào.
 `.trim();
 
+    let promptText =
+      message ||
+      "Hãy đọc tệp/hình ảnh đính kèm này, trích xuất thông tin giao dịch/khiếu nại và đưa tôi đến chức năng phù hợp.";
+    if (extractedFileText) {
+      promptText += `\n\n[Nội dung tệp đính kèm "${attachedFileName}"]:\n${extractedFileText}`;
+    }
+
     const parts: Array<{ text: string } | { inlineData: { mimeType: string; data: string } }> = [
-      {
-        text: message || "Hãy đọc hình ảnh đính kèm này, trích xuất thông tin giao dịch/khiếu nại và đưa tôi đến chức năng phù hợp.",
-      },
+      { text: promptText },
     ];
-    if (imageBase64) {
-      parts.push({ inlineData: { mimeType: imageMime, data: imageBase64 } });
+    if (fileBase64) {
+      parts.push({ inlineData: { mimeType: fileMime, data: fileBase64 } });
     }
 
     let responseText: string | undefined;
