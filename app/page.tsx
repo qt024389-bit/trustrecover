@@ -3,6 +3,7 @@
 import React, { useState } from "react";
 import TrustRecoverLogo from "@/components/TrustRecoverLogo";
 import DisputeIntelligenceWorkspace, { WorkspacePrefill } from "@/components/DisputeIntelligenceWorkspace";
+import type { DisputeCaseAnalysis } from "@/lib/dispute/types";
 import TrustRecoverCopilot, { CopilotActionPayload } from "@/components/TrustRecoverCopilot";
 import FujiTransactionVerifier from "@/components/FujiTransactionVerifier";
 import OnChainStatsAndCases from "@/components/OnChainStatsAndCases";
@@ -56,6 +57,8 @@ export default function Home() {
   const [activeTab, setActiveTab] = useState<WorkspaceTab>("dashboard");
   const [workspacePrefill, setWorkspacePrefill] = useState<WorkspacePrefill | null>(null);
   const [auditPrefill, setAuditPrefill] = useState<{ nonce: number; txHash: string } | null>(null);
+  const [localCases, setLocalCases] = useState<DisputeCaseAnalysis[]>([]);
+  const [selectedLocalCase, setSelectedLocalCase] = useState<{ nonce: number; data: DisputeCaseAnalysis } | null>(null);
 
   function handleCopilotAction(action: CopilotActionPayload) {
     setActiveTab(action.targetTab);
@@ -152,7 +155,7 @@ export default function Home() {
 
             {/* TAB 1: TONG QUAN */}
             <div className={activeTab === "dashboard" ? "block space-y-8" : "hidden"}>
-              <OnChainStatsAndCases />
+              <OnChainStatsAndCases showList={false} />
 
               <div className="grid gap-6 xl:grid-cols-[1.5fr_1fr]">
                 <div className="rounded-2xl border border-white/10 bg-[#111b2d] p-6">
@@ -228,13 +231,48 @@ export default function Home() {
             </div>
 
             {/* TAB 2: HO SO TRANH CHAP */}
-            <div className={activeTab === "cases" ? "block" : "hidden"}>
-              <OnChainStatsAndCases />
+            <div className={activeTab === "cases" ? "block space-y-6" : "hidden"}>
+              <OnChainStatsAndCases showList={true} />
+
+              <div className="rounded-2xl border border-white/10 bg-[#111b2d] p-5">
+                <h3 className="text-sm font-semibold text-white">
+                  Hồ sơ đã phân tích (Lưu cục bộ trên trình duyệt)
+                </h3>
+                <p className="mt-1 text-xs text-slate-400">
+                  Bấm vào mã hồ sơ để mở lại toàn bộ báo cáo AskPay • DoubtStamp • LEGALMIND đã chạy trước đó.
+                </p>
+                {localCases.length === 0 ? (
+                  <p className="mt-3 text-xs text-slate-500">
+                    Chưa có hồ sơ phân tích cục bộ nào trong phiên trình duyệt này.
+                  </p>
+                ) : (
+                  <div className="mt-3 flex flex-wrap gap-2">
+                    {localCases.map((c) => (
+                      <button
+                        key={c.caseId}
+                        type="button"
+                        onClick={() => {
+                          setSelectedLocalCase({ nonce: Date.now(), data: c });
+                          setActiveTab("analysis");
+                        }}
+                        className="rounded-xl border border-cyan-500/25 bg-cyan-500/10 px-3.5 py-2 text-left text-xs transition hover:bg-cyan-500/20"
+                      >
+                        <div className="font-mono font-bold text-cyan-300">
+                          {c.caseId}
+                        </div>
+                        <div className="mt-0.5 text-[11px] text-slate-400">
+                          Điểm: {c.aiInvestigation.doubtStamp.evidenceSufficiencyScore}/100
+                        </div>
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
             </div>
 
             {/* TAB 3: PHAN TICH BANG CHUNG */}
             <div className={activeTab === "analysis" ? "block" : "hidden"}>
-              <DisputeIntelligenceWorkspace copilotPrefill={workspacePrefill} />
+              <DisputeIntelligenceWorkspace copilotPrefill={workspacePrefill} externalCase={selectedLocalCase} onCaseSaved={setLocalCases} />
             </div>
 
             {/* TAB 4: KIEM TRA AVALANCHE */}

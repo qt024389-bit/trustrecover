@@ -15,7 +15,7 @@ interface AnchoredCaseItem {
   anchoredAt: number;
 }
 
-export default function OnChainStatsAndCases() {
+export default function OnChainStatsAndCases({ showList = true }: { showList?: boolean }) {
   const [totalCases, setTotalCases] = useState<number | null>(null);
   const [cases, setCases] = useState<AnchoredCaseItem[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
@@ -190,6 +190,7 @@ export default function OnChainStatsAndCases() {
           </div>
         )}
       </div>
+      )}
     </div>
   );
 }

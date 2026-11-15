@@ -34,8 +34,12 @@ export interface WorkspacePrefill {
 
 export default function DisputeIntelligenceWorkspace({
   copilotPrefill,
+  externalCase,
+  onCaseSaved,
 }: {
   copilotPrefill?: WorkspacePrefill | null;
+  externalCase?: { nonce: number; data: DisputeCaseAnalysis } | null;
+  onCaseSaved?: (cases: DisputeCaseAnalysis[]) => void;
 }) {
   const [txHash, setTxHash] = useState("");
   const [userClaim, setUserClaim] = useState("");
@@ -61,9 +65,13 @@ export default function DisputeIntelligenceWorkspace({
   }, [copilotPrefill]);
 
   useEffect(() => {
+    if (externalCase?.data) setAnalysis(externalCase.data);
+  }, [externalCase]);
+
+  useEffect(() => {
     try {
       const raw = localStorage.getItem("trustrecover_cases_v1");
-      if (raw) setSavedCases(JSON.parse(raw));
+      if (raw) { const parsed = JSON.parse(raw); setSavedCases(parsed); if (onCaseSaved) onCaseSaved(parsed); }
     } catch {
       // ignore storage errors
     }
@@ -77,7 +85,7 @@ export default function DisputeIntelligenceWorkspace({
       } catch {
         // ignore
       }
-      return next;
+      if (onCaseSaved) onCaseSaved(next); return next;
     });
   }
 
@@ -330,14 +338,7 @@ export default function DisputeIntelligenceWorkspace({
         </div>
       </form>
 
-      {savedCases.length > 0 && (
-        <div className="mt-4 flex flex-wrap items-center gap-2 rounded-xl border border-white/10 bg-slate-900/50 px-3.5 py-2.5 text-xs">
-          <span className="font-semibold text-slate-400">Hồ sơ đã phân tích (lưu cục bộ):</span>
-          {savedCases.map((c) => (
-            <button
-              key={c.caseId}
-              type="button"
-              onClick={() => setAnalysis(c)}
+      
               className={`rounded-md px-2.5 py-1 font-mono text-[11px] transition ${
                 analysis?.caseId === c.caseId
                   ? "bg-cyan-500/25 text-cyan-200 ring-1 ring-cyan-400/50"
