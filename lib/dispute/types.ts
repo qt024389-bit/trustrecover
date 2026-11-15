@@ -94,5 +94,30 @@ export interface DisputeCaseAnalysis {
     doubtStamp: DoubtStampReport;
     legalMind: LegalMindReport;
   };
+  crossEngineCheck?: CrossEngineConsistencyReport;
+  recoveryReadiness?: RecoveryReadinessReport;
   auditHistory: AuditLogEntry[];
+}
+
+export interface RecoveryReadinessFactor {
+  factor: string;
+  points: number;
+  maxPoints: number;
+  status: "PASS" | "PARTIAL" | "MISSING";
+  explanation: string;
+}
+
+export interface RecoveryReadinessReport {
+  score: number;
+  level: "HIGH" | "MODERATE" | "LOW" | "CRITICAL_GAP";
+  capApplied?: string;
+  factors: RecoveryReadinessFactor[];
+  summary: string;
+}
+
+export interface CrossEngineConsistencyReport {
+  consistent: boolean;
+  requiresHumanReview: boolean;
+  conflictsDetected: string[];
+  finalTransparentConclusion: string;
 }

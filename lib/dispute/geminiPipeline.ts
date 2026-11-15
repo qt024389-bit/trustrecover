@@ -1,5 +1,6 @@
 import { GoogleGenAI, Type, Schema } from "@google/genai";
 import { verifyFujiTransaction } from "@/lib/avalanche/verifyTransaction";
+import { evaluateCrossEngineAndReadiness } from "./consistencyAndScoring";
 import type {
   DisputeCaseAnalysis,
   EvidenceFileMeta,
@@ -322,6 +323,24 @@ Bạn vận hành 3 module nối tiếp trên cùng một hồ sơ tranh chấp:
   }
 
   const parsed = JSON.parse(rawText);
+  const cleanEvidence = params.evidenceFiles.map(({ inlineDataBase64, ...rest }) => rest);
+
+  const { crossEngineCheck, recoveryReadiness } = evaluateCrossEngineAndReadiness({
+    txResult,
+    evidenceFiles: cleanEvidence,
+    askPay: parsed.askPay,
+    doubtStamp: parsed.doubtStamp,
+    legalMind: parsed.legalMind,
+  });
+
+  // Dong bo diem so chuan xac va ghi Audit Log kiem tra cheo
+  parsed.doubtStamp.evidenceSufficiencyScore = recoveryReadiness.score;
+  auditHistory.push({
+    timestamp: new Date().toISOString(),
+    actor: "GEMINI_AI_PIPELINE",
+    action: "CROSS_ENGINE_CONSISTENCY_CHECK",
+    detail: `Kiểm tra chéo 3 engine: ${crossEngineCheck.consistent ? "Đồng nhất" : "Phát hiện " + crossEngineCheck.conflictsDetected.length + " xung đột"}. Điểm Recovery Readiness: ${recoveryReadiness.score}/100.`,
+  });
 
   auditHistory.push({
     timestamp: new Date().toISOString(),
@@ -362,6 +381,8 @@ Bạn vận hành 3 module nối tiếp trên cùng một hồ sơ tranh chấp:
       doubtStamp: parsed.doubtStamp,
       legalMind: parsed.legalMind,
     },
+    crossEngineCheck,
+    recoveryReadiness,
     auditHistory,
   };
 }
