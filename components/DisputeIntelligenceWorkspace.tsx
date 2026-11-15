@@ -186,7 +186,7 @@ export default function DisputeIntelligenceWorkspace({
   }
 
   return (
-    <div className="mt-4 w-full max-w-full overflow-hidden [overflow-wrap:anywhere] rounded-3xl border border-cyan-500/25 bg-gradient-to-b from-slate-900/90 to-slate-950/95 p-5 text-slate-100 shadow-2xl shadow-cyan-950/30 backdrop-blur sm:p-8">
+    <div className="mt-4 min-w-0 w-full max-w-full overflow-hidden rounded-3xl border border-cyan-500/25 bg-gradient-to-b from-slate-900/90 to-slate-950/95 p-5 text-slate-100 shadow-2xl shadow-cyan-950/30 backdrop-blur sm:p-8">
       {/* Header */}
       <div className="flex flex-wrap items-center justify-between gap-4 border-b border-white/10 pb-5">
         <div>
@@ -514,7 +514,7 @@ export default function DisputeIntelligenceWorkspace({
                 <div className="text-xs font-semibold text-emerald-300">
                   Sự kiện xác minh trực tiếp (AskPay Verified Facts):
                 </div>
-                <ul className="mt-1.5 list-disc space-y-1 break-words pl-4 text-xs text-slate-200">
+                <ul className="mt-1.5 list-disc space-y-1 [overflow-wrap:anywhere] pl-4 text-xs text-slate-200">
                   {analysis.aiInvestigation.askPay.verifiedBlockchainFacts.map(
                     (fact, i) => (
                       <li key={i}>{fact}</li>
@@ -585,7 +585,7 @@ export default function DisputeIntelligenceWorkspace({
               </span>
             </div>
 
-            <p className="mt-2 text-xs text-slate-300">
+            <p className="mt-2 [overflow-wrap:anywhere] text-xs text-slate-300">
               {analysis.aiInvestigation.doubtStamp.overallConsistencySummary}
             </p>
 
@@ -634,22 +634,22 @@ export default function DisputeIntelligenceWorkspace({
                       <td className="py-3 pr-3 font-medium text-white">
                         {item.claimAspect}
                       </td>
-                      <td className="py-3 pr-3 text-slate-300">
+                      <td className="py-3 pr-3 [overflow-wrap:anywhere] text-slate-300">
                         {item.userStatement}
                       </td>
-                      <td className="py-3 pr-3 font-mono text-[11px] text-slate-300">
+                      <td className="py-3 pr-3 font-mono text-[11px] [overflow-wrap:anywhere] text-slate-300">
                         {item.onChainOrEvidenceReference}
                       </td>
                       <td className="py-3 pr-3">
                         <span
-                          className={`inline-block rounded-md px-2 py-0.5 font-mono text-[11px] font-bold ${verdictBadgeClass(
+                          className={`inline-block whitespace-nowrap rounded-md px-2.5 py-0.5 font-mono text-[11px] font-bold ${verdictBadgeClass(
                             item.verdict
                           )}`}
                         >
                           {item.verdict}
                         </span>
                       </td>
-                      <td className="py-3 pr-3 text-slate-300">
+                      <td className="py-3 pr-3 [overflow-wrap:anywhere] text-slate-300">
                         <div>{item.reasoning}</div>
                         <span className="mt-1 inline-block font-mono text-[10px] text-cyan-400">
                           Nguồn: {item.dataSource}
@@ -702,7 +702,7 @@ export default function DisputeIntelligenceWorkspace({
             <h3 className="text-sm font-bold text-cyan-300">
               LEGALMIND – Đề xuất Hướng xử lý & Danh sách kiểm tra
             </h3>
-            <p className="mt-2 text-xs text-slate-300">
+            <p className="mt-2 [overflow-wrap:anywhere] text-xs text-slate-300">
               {analysis.aiInvestigation.legalMind.executiveSummary}
             </p>
 
@@ -720,7 +720,7 @@ export default function DisputeIntelligenceWorkspace({
                       {step.category} • {step.priority}
                     </span>
                   </div>
-                  <p className="mt-1.5 text-slate-300">{step.description}</p>
+                  <p className="mt-1.5 [overflow-wrap:anywhere] text-slate-300">{step.description}</p>
                 </div>
               ))}
             </div>
