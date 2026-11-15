@@ -1,4 +1,5 @@
 "use client";
+import ArbitrationPanel from "./ArbitrationPanel";
 
 import React, { useEffect, useState } from "react";
 import AnchorCaseOnChainButton from "./AnchorCaseOnChainButton";
@@ -823,6 +824,8 @@ export default function DisputeIntelligenceWorkspace({
               )}
             </div>
           )}
+
+          <ArbitrationPanel caseId={analysis.caseId} reportPayload={analysis} />
 
           {/* 4. AUDIT HISTORY & HUMAN REVIEWER VALIDATION */}
           <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
