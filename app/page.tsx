@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
+import TrustRecoverLogo from "@/components/TrustRecoverLogo";
 import DisputeIntelligenceWorkspace from "@/components/DisputeIntelligenceWorkspace";
 import FujiTransactionVerifier from "@/components/FujiTransactionVerifier";
 import OnChainStatsAndCases from "@/components/OnChainStatsAndCases";
@@ -58,14 +59,9 @@ export default function Home() {
         {/* Sidebar ben trai: Phan Logo hoa lien mach, Khong gian lam viec nen trang */}
         <aside className="flex w-full shrink-0 flex-col justify-between border-b border-slate-200 bg-white text-slate-900 lg:w-72 lg:border-b-0 lg:border-r">
           <div>
-            {/* Logo tran vien hoa vao nen den */}
-            <div className="bg-[#020308] px-6 pt-5 pb-5 text-white">
-              <img
-                src="/logo.jpg"
-                alt="TrustRecover AI"
-                className="mx-auto w-full max-w-[200px] object-contain mix-blend-lighten"
-              />
-              <p className="mt-2 text-center text-[11px] text-slate-400">
+            <div className="border-b border-slate-100 px-6 pt-6 pb-5">
+              <TrustRecoverLogo />
+              <p className="mt-3 text-xs leading-relaxed text-slate-500">
                 Nền tảng AI điều tra & hỗ trợ xử lý tranh chấp DeFi
               </p>
             </div>
