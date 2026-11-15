@@ -2,6 +2,8 @@
 
 Built for **Avalanche Team1 Vietnam UniHack 2026**.
 
+- **Live Demo**: https://trustrecover.vercel.app
+
 > **Core Principles**: AI investigates • Evidence is verified • Avalanche anchors an auditable case history • Human reviewers validate outcomes.
 
 ## Architecture & Modules

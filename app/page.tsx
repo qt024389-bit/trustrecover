@@ -5,6 +5,7 @@ import TrustRecoverLogo from "@/components/TrustRecoverLogo";
 import DisputeIntelligenceWorkspace from "@/components/DisputeIntelligenceWorkspace";
 import FujiTransactionVerifier from "@/components/FujiTransactionVerifier";
 import OnChainStatsAndCases from "@/components/OnChainStatsAndCases";
+import ReviewerManagerPanel from "@/components/ReviewerManagerPanel";
 import {
   SNOWTRACE_FUJI_URL,
   TRUSTRECOVER_FUJI_CHAIN_ID,
@@ -267,6 +268,7 @@ export default function Home() {
                   <div>Giới hạn tải bằng chứng: Tối đa 5 tệp (5MB/tệp)</div>
                 </div>
               </div>
+              <ReviewerManagerPanel />
             </div>
           </div>
 

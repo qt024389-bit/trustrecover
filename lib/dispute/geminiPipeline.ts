@@ -290,10 +290,18 @@ Bạn vận hành 3 module nối tiếp trên cùng một hồ sơ tranh chấp:
           temperature: 0.1,
         },
       });
-      const timeoutPromise = new Promise<never>((_, reject) =>
-        setTimeout(() => reject(new Error(`Timeout sau 25s voi model ${candidate}`)), 25000)
-      );
-      response = await Promise.race([apiPromise, timeoutPromise]);
+      const controller = new AbortController();
+      const timer = setTimeout(() => controller.abort(), 25000);
+      const timeoutPromise = new Promise<never>((_, reject) => {
+        controller.signal.addEventListener("abort", () =>
+          reject(new Error(`Timeout sau 25s voi model ${candidate}`))
+        );
+      });
+      try {
+        response = await Promise.race([apiPromise, timeoutPromise]);
+      } finally {
+        clearTimeout(timer);
+      }
       console.log(`[TRUSTRECOVER AI] Success with model: ${candidate}`);
       break;
     } catch (err) {

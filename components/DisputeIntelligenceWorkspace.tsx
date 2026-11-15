@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import AnchorCaseOnChainButton from "./AnchorCaseOnChainButton";
 import type {
   DisputeCaseAnalysis,
@@ -32,15 +32,66 @@ export default function DisputeIntelligenceWorkspace() {
   const [loading, setLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [analysis, setAnalysis] = useState<DisputeCaseAnalysis | null>(null);
+  const [savedCases, setSavedCases] = useState<DisputeCaseAnalysis[]>([]);
 
-  function fillDemoScenario() {
-    setTxHash(DEMO_FUJI_TX);
-    setClaimedAmountAvax("25.5");
-    setClaimedRecipient("0x13f452C47AfeFC53A36F30afb8105F53C89f838E");
-    setUserClaim(
-      "Tôi đã chuyển 25.5 AVAX trực tiếp vào hợp đồng 0x13f452C47AfeFC53A36F30afb8105F53C89f838E để tham gia pool thanh khoản, nhưng bên đối tác báo chưa nhận được tiền và từ chối hoàn trả."
-    );
+  useEffect(() => {
+    try {
+      const raw = localStorage.getItem("trustrecover_cases_v1");
+      if (raw) setSavedCases(JSON.parse(raw));
+    } catch {
+      // ignore storage errors
+    }
+  }, []);
+
+  function saveCaseLocally(item: DisputeCaseAnalysis) {
+    setSavedCases((prev) => {
+      const next = [item, ...prev.filter((x) => x.caseId !== item.caseId)].slice(0, 6);
+      try {
+        localStorage.setItem("trustrecover_cases_v1", JSON.stringify(next));
+      } catch {
+        // ignore
+      }
+      return next;
+    });
+  }
+
+  function fillScenario(type: "contradicted" | "verified" | "notfound") {
     setErrorMsg(null);
+    if (type === "contradicted") {
+      setTxHash(DEMO_FUJI_TX);
+      setClaimedAmountAvax("25.5");
+      setClaimedRecipient("0x13f452C47AfeFC53A36F30afb8105F53C89f838E");
+      setUserClaim(
+        "Tôi đã chuyển 25.5 AVAX trực tiếp vào hợp đồng 0x13f452C47AfeFC53A36F30afb8105F53C89f838E để tham gia pool thanh khoản, nhưng bên đối tác báo chưa nhận được tiền và từ chối hoàn trả."
+      );
+    } else if (type === "verified") {
+      setTxHash(DEMO_FUJI_TX);
+      setClaimedAmountAvax("0");
+      setClaimedRecipient("0x13f452C47AfeFC53A36F30afb8105F53C89f83BE");
+      setUserClaim(
+        "Tôi đã gửi lệnh tương tác hợp đồng thông minh (0 AVAX native) tới địa chỉ 0x13f452C47AfeFC53A36F30afb8105F53C89f83BE trên Avalanche Fuji Testnet, giao dịch đã xác nhận thành công."
+      );
+    } else {
+      setTxHash("0x" + "0".repeat(64));
+      setClaimedAmountAvax("10");
+      setClaimedRecipient("0x13f452C47AfeFC53A36F30afb8105F53C89f83BE");
+      setUserClaim(
+        "Đối tác gửi cho tôi mã giao dịch này và khẳng định đã hoàn trả 10 AVAX thành công trên Avalanche Fuji."
+      );
+    }
+  }
+
+  function exportReportJson() {
+    if (!analysis) return;
+    const blob = new Blob([JSON.stringify(analysis, null, 2)], {
+      type: "application/json",
+    });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `TRUSTRECOVER-${analysis.caseId}.json`;
+    a.click();
+    URL.revokeObjectURL(url);
   }
 
   async function handleSubmit(e: React.FormEvent) {
@@ -73,7 +124,9 @@ export default function DisputeIntelligenceWorkspace() {
           json?.error?.message || "Không thể thực hiện phân tích hồ sơ tranh chấp."
         );
       } else {
-        setAnalysis(json.data as DisputeCaseAnalysis);
+        const resultData = json.data as DisputeCaseAnalysis;
+        setAnalysis(resultData);
+        saveCaseLocally(resultData);
       }
     } catch {
       setErrorMsg("Lỗi kết nối đến máy chủ phân tích AI Dispute Pipeline.");
@@ -127,13 +180,29 @@ export default function DisputeIntelligenceWorkspace() {
           </p>
         </div>
 
-        <button
-          type="button"
-          onClick={fillDemoScenario}
-          className="rounded-xl border border-cyan-500/30 bg-cyan-500/10 px-4 py-2 text-xs font-medium text-cyan-200 transition hover:bg-cyan-500/20"
-        >
-          Nạp kịch bản tranh chấp mẫu (Fuji On-Chain)
-        </button>
+        <div className="flex flex-wrap gap-2">
+          <button
+            type="button"
+            onClick={() => fillScenario("contradicted")}
+            className="rounded-lg border border-rose-500/30 bg-rose-500/10 px-3 py-1.5 text-[11px] font-medium text-rose-200 hover:bg-rose-500/20"
+          >
+            Mẫu 1: Khai sai (Mâu thuẫn)
+          </button>
+          <button
+            type="button"
+            onClick={() => fillScenario("verified")}
+            className="rounded-lg border border-emerald-500/30 bg-emerald-500/10 px-3 py-1.5 text-[11px] font-medium text-emerald-200 hover:bg-emerald-500/20"
+          >
+            Mẫu 2: Khớp On-Chain
+          </button>
+          <button
+            type="button"
+            onClick={() => fillScenario("notfound")}
+            className="rounded-lg border border-amber-500/30 bg-amber-500/10 px-3 py-1.5 text-[11px] font-medium text-amber-200 hover:bg-amber-500/20"
+          >
+            Mẫu 3: Tx không tồn tại
+          </button>
+        </div>
       </div>
 
       {/* Form: Transaction + User Claim + Evidence Upload */}
@@ -234,6 +303,26 @@ export default function DisputeIntelligenceWorkspace() {
           </button>
         </div>
       </form>
+
+      {savedCases.length > 0 && (
+        <div className="mt-4 flex flex-wrap items-center gap-2 rounded-xl border border-white/10 bg-slate-900/50 px-3.5 py-2.5 text-xs">
+          <span className="font-semibold text-slate-400">Hồ sơ đã phân tích (lưu cục bộ):</span>
+          {savedCases.map((c) => (
+            <button
+              key={c.caseId}
+              type="button"
+              onClick={() => setAnalysis(c)}
+              className={`rounded-md px-2.5 py-1 font-mono text-[11px] transition ${
+                analysis?.caseId === c.caseId
+                  ? "bg-cyan-500/25 text-cyan-200 ring-1 ring-cyan-400/50"
+                  : "bg-white/5 text-slate-300 hover:bg-white/10"
+              }`}
+            >
+              {c.caseId}
+            </button>
+          ))}
+        </div>
+      )}
 
       {errorMsg && (
         <div className="mt-4 rounded-xl border border-rose-500/30 bg-rose-950/40 p-4 text-xs text-rose-200">
@@ -669,6 +758,13 @@ export default function DisputeIntelligenceWorkspace() {
                   className="w-full rounded-xl bg-amber-500/20 px-3 py-2.5 text-xs font-semibold text-amber-300 ring-1 ring-amber-500/40 hover:bg-amber-500/30"
                 >
                   ⚑ Đánh dấu cần điều tra chuyên sâu (Escalate)
+                </button>
+                <button
+                  type="button"
+                  onClick={exportReportJson}
+                  className="w-full rounded-xl border border-white/15 bg-white/5 px-3 py-2 text-xs font-medium text-slate-200 hover:bg-white/10"
+                >
+                  ⤓ Xuất Báo cáo Kiểm toán (.json)
                 </button>
                 <AnchorCaseOnChainButton
                   analysis={analysis}

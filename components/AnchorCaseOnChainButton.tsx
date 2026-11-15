@@ -79,6 +79,26 @@ export default function AnchorCaseOnChainButton({
         signer
       );
 
+      // Kiem tra quyen onlyReviewer truoc khi mo hop thoai ky
+      const isAuthorized: boolean = await contract.authorizedReviewers(
+        reviewerAddress
+      );
+      if (!isAuthorized) {
+        throw new Error(
+          `Ví ${reviewerAddress.slice(0, 6)}...${reviewerAddress.slice(
+            -4
+          )} chưa được cấp quyền Kiểm duyệt viên (onlyReviewer) trên Smart Contract v2.`
+        );
+      }
+
+      // Kiem tra trung caseId truoc khi mo hop thoai ky
+      const existing = await contract.getCase(analysis.caseId);
+      if (existing && Number(existing.anchoredAt) > 0) {
+        throw new Error(
+          `Hồ sơ ${analysis.caseId} đã được neo vĩnh viễn trên Avalanche Fuji trước đó.`
+        );
+      }
+
       const rawTxHash = analysis.userInput.txHash.trim();
       const txHashBytes32 = /^0x[A-Fa-f0-9]{64}$/.test(rawTxHash)
         ? rawTxHash
@@ -92,7 +112,6 @@ export default function AnchorCaseOnChainButton({
         askPaySummary: analysis.aiInvestigation.askPay.txStatusSummary,
       });
       const reportHash = keccak256(toUtf8Bytes(reportPayload));
-
       const verdictSummary = `SCORE_${analysis.aiInvestigation.doubtStamp.evidenceSufficiencyScore}_HUMAN_APPROVED`;
 
       const tx = await contract.anchorCase(
@@ -127,7 +146,7 @@ export default function AnchorCaseOnChainButton({
         className="w-full rounded-xl bg-cyan-500/20 px-3 py-2.5 text-xs font-bold text-cyan-200 ring-1 ring-cyan-400/40 transition hover:bg-cyan-500/30 disabled:opacity-50"
       >
         {anchoring
-          ? "Đang chờ MetaMask ký & xác nhận trên Fuji..."
+          ? "Đang kiểm tra quyền & chờ MetaMask..."
           : anchorTxHash
           ? "✓ Đã neo hồ sơ vĩnh viễn trên Avalanche Fuji"
           : "⛓ Ký & Neo Hồ Sơ Lên Avalanche Fuji (On-Chain)"}
@@ -150,7 +169,7 @@ export default function AnchorCaseOnChainButton({
       )}
 
       {anchorError && (
-        <div className="rounded-lg border border-rose-500/30 bg-rose-950/30 p-2 text-[11px] text-rose-200">
+        <div className="rounded-lg border border-rose-500/30 bg-rose-950/30 p-2.5 text-[11px] text-rose-200">
           {anchorError}
         </div>
       )}

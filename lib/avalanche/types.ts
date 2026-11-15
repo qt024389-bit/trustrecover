@@ -42,6 +42,11 @@ export interface VerifiedTransactionData {
     logsCount: number;
     logs: TransactionLogItem[];
   };
+  recipientProfile?: {
+    address: string;
+    isContract: boolean;
+    balanceAvax: string;
+  } | null;
   queriedAt: string;
 }
 
@@ -52,6 +57,11 @@ export interface VerificationErrorResponse {
     code: VerificationErrorCode;
     message: string;
   };
+  recipientProfile?: {
+    address: string;
+    isContract: boolean;
+    balanceAvax: string;
+  } | null;
   queriedAt: string;
 }
 

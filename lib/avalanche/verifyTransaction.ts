@@ -116,6 +116,28 @@ export async function verifyFujiTransaction(
       status = receipt.status === 1 ? "confirmed" : "failed";
     }
 
+    let recipientProfile: {
+      address: string;
+      isContract: boolean;
+      balanceAvax: string;
+    } | null = null;
+
+    if (tx.to) {
+      try {
+        const [code, balWei] = await Promise.all([
+          provider.getCode(tx.to),
+          provider.getBalance(tx.to),
+        ]);
+        recipientProfile = {
+          address: tx.to,
+          isContract: code !== "0x" && code.length > 2,
+          balanceAvax: formatEther(balWei),
+        };
+      } catch {
+        recipientProfile = null;
+      }
+    }
+
     return {
       success: true,
       data: {
@@ -146,6 +168,7 @@ export async function verifyFujiTransaction(
           logsCount: logs.length,
           logs,
         },
+        recipientProfile,
         queriedAt,
       },
     };
