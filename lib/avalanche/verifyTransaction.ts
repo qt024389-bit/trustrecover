@@ -1,4 +1,5 @@
 import { Interface, JsonRpcProvider, formatEther } from "ethers";
+import { fetchVerifiedContractInterface } from "./abiResolver";
 import { resolveAvalancheNetwork, type AvalancheNetworkConfig } from "./networks";
 import { VerifyTransactionResult, TransactionLogItem } from "./types";
 
@@ -79,10 +80,72 @@ export async function verifyFujiTransaction(
       };
     }
 
+    let recipientProfile: {
+      address: string;
+      isContract: boolean;
+      balanceAvax: string;
+      abiVerified?: boolean;
+    } | null = null;
+
+    let verifiedIface: Interface | null = null;
+
+    if (tx.to) {
+      try {
+        const [code, balWei] = await Promise.all([
+          provider.getCode(tx.to),
+          provider.getBalance(tx.to),
+        ]);
+        const isContract = code !== "0x" && code.length > 2;
+        if (isContract) {
+          verifiedIface = await fetchVerifiedContractInterface(cfg.chainId, tx.to);
+        }
+        recipientProfile = {
+          address: tx.to,
+          isContract,
+          balanceAvax: formatEther(balWei),
+          abiVerified: Boolean(verifiedIface),
+        };
+      } catch {
+        recipientProfile = null;
+      }
+    }
+
+    let decodedFunction: {
+      name: string;
+      signature: string;
+      args: Record<string, string>;
+    } | null = null;
+
+    if (verifiedIface && tx.data && tx.data !== "0x") {
+      try {
+        const parsedTx = verifiedIface.parseTransaction({
+          data: tx.data,
+          value: tx.value,
+        });
+        if (parsedTx) {
+          const args: Record<string, string> = {};
+          parsedTx.fragment.inputs.forEach((input, idx) => {
+            args[input.name || `arg${idx}`] = String(parsedTx.args[idx]);
+          });
+          decodedFunction = {
+            name: parsedTx.name,
+            signature: parsedTx.signature,
+            args,
+          };
+        }
+      } catch {
+        decodedFunction = null;
+      }
+    }
+
+    const ifaces = verifiedIface
+      ? [ERC20_IFACE, AWM_IFACE, verifiedIface]
+      : [ERC20_IFACE, AWM_IFACE];
+
     const logs: TransactionLogItem[] = receipt
       ? receipt.logs.map((log) => {
           let decodedEvent: { name: string; args: Record<string, string> } | undefined;
-          for (const iface of [ERC20_IFACE, AWM_IFACE]) {
+          for (const iface of ifaces) {
             try {
               const parsed = iface.parseLog({
                 topics: [...log.topics],
@@ -117,28 +180,6 @@ export async function verifyFujiTransaction(
       status = receipt.status === 1 ? "confirmed" : "failed";
     }
 
-    let recipientProfile: {
-      address: string;
-      isContract: boolean;
-      balanceAvax: string;
-    } | null = null;
-
-    if (tx.to) {
-      try {
-        const [code, balWei] = await Promise.all([
-          provider.getCode(tx.to),
-          provider.getBalance(tx.to),
-        ]);
-        recipientProfile = {
-          address: tx.to,
-          isContract: code !== "0x" && code.length > 2,
-          balanceAvax: formatEther(balWei),
-        };
-      } catch {
-        recipientProfile = null;
-      }
-    }
-
     return {
       success: true,
       data: {
@@ -157,6 +198,7 @@ export async function verifyFujiTransaction(
           gasLimit: tx.gasLimit.toString(),
           blockNumber: tx.blockNumber,
           blockHash: tx.blockHash,
+          decodedFunction,
         },
         receipt: {
           status,

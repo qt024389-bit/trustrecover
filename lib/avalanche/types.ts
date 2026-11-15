@@ -31,6 +31,7 @@ export interface VerifiedTransactionData {
     gasLimit: string;
     blockNumber: number | null;
     blockHash: string | null;
+    decodedFunction?: { name: string; signature: string; args: Record<string, string> } | null;
   };
   receipt: {
     status: "confirmed" | "failed" | "pending";
@@ -46,6 +47,7 @@ export interface VerifiedTransactionData {
     address: string;
     isContract: boolean;
     balanceAvax: string;
+    abiVerified?: boolean;
   } | null;
   queriedAt: string;
 }
@@ -61,6 +63,7 @@ export interface VerificationErrorResponse {
     address: string;
     isContract: boolean;
     balanceAvax: string;
+    abiVerified?: boolean;
   } | null;
   queriedAt: string;
 }
