@@ -143,10 +143,12 @@ export default function TrustRecoverCopilot({
         setReply(json.error || "Không thể xử lý yêu cầu lúc này.");
       } else {
         setReply(json.data.reply);
-        onExecuteAction({
-          targetTab: json.data.targetTab,
-          autoFill: json.data.autoFill,
-        });
+        if ((json.data.targetTab && json.data.targetTab !== "none") || json.data.autoFill) {
+          onExecuteAction({
+            targetTab: json.data.targetTab && json.data.targetTab !== "none" ? json.data.targetTab : "analysis",
+            autoFill: json.data.autoFill,
+          });
+        }
         setInput("");
         setAttachedFile(null);
       }

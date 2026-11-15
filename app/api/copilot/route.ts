@@ -8,7 +8,7 @@ const COPILOT_SCHEMA: Schema = {
     reply: { type: Type.STRING },
     targetTab: {
       type: Type.STRING,
-      enum: ["dashboard", "cases", "analysis", "audit", "settings"],
+      enum: ["none", "dashboard", "cases", "analysis", "audit", "settings"],
     },
     autoFill: {
       type: Type.OBJECT,
@@ -105,7 +105,7 @@ Hãy chọn đúng targetTab:
 Nếu có tệp hoặc hình ảnh đính kèm:
 - Đọc kỹ mọi chữ, mã 0x (txHash 66 ký tự hoặc địa chỉ ví 42 ký tự), số tiền AVAX, và nội dung trong tệp/ảnh.
 - Tự động điền các thông tin trích xuất được vào autoFill (txHash, claimedRecipient, claimedAmountAvax, userClaim).
-- Trả lời ngắn gọn (1-2 câu tiếng Việt) bạn đã đọc được gì và đã chuyển người dùng tới tab nào.
+- Trò chuyện tự nhiên, thân thiện và giải thích rõ ràng bằng tiếng Việt như một chuyên gia hỗ trợ người dùng DeFi. Chỉ chọn targetTab khác "none" khi người dùng thực sự muốn mở tab, chạy mẫu hoặc điền biểu mẫu; nếu họ chỉ đang hỏi đáp/tìm hiểu thì đặt targetTab = "none" để không làm gián đoạn màn hình hiện tại.
 `.trim();
 
     let promptText =
@@ -133,7 +133,7 @@ Nếu có tệp hoặc hình ảnh đính kèm:
               systemInstruction,
               responseMimeType: "application/json",
               responseSchema: COPILOT_SCHEMA,
-              temperature: 0.1,
+              temperature: 0.45,
             },
           }),
           new Promise<never>((_, rej) => setTimeout(() => rej(new Error("TIMEOUT")), 20000)),
