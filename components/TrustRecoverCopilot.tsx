@@ -19,8 +19,9 @@ interface TrustRecoverCopilotProps {
 
 const QUICK_PROMPTS = [
   "Chạy thử kịch bản tranh chấp mẫu cho tôi xem",
+  "Mở hàng chờ Trọng tài On-Chain để Reviewer bỏ phiếu",
+  "Kiểm tra giao dịch trên Avalanche Fuji hoặc Dispatch L1",
   "Tôi muốn kiểm tra file báo cáo .json có bị sửa không",
-  "Xem danh sách hồ sơ đã neo trên Avalanche Fuji",
 ];
 
 function HeronLogoIcon({ size = 26 }: { size?: number }) {
