@@ -81,7 +81,7 @@ export default function OnChainStatsAndCases() {
         {liveStats.map((stat) => (
           <div
             key={stat.label}
-            className="rounded-2xl border border-white/10 bg-[#111b2d] p-5"
+            className="flex flex-col justify-between rounded-2xl border border-white/10 bg-[#111b2d] p-5"
           >
             <p className="text-xs text-slate-400">{stat.label}</p>
             <p className="mt-2 font-mono text-2xl font-bold text-cyan-300">
@@ -93,7 +93,7 @@ export default function OnChainStatsAndCases() {
       </div>
 
       {/* Live On-Chain Anchored Cases */}
-      <div className="rounded-2xl border border-white/10 bg-[#111b2d] p-5">
+      <div className="flex flex-col justify-between rounded-2xl border border-white/10 bg-[#111b2d] p-5">
         <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
           <div>
             <h3 className="text-sm font-semibold text-white">

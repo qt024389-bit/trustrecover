@@ -712,12 +712,12 @@ export default function DisputeIntelligenceWorkspace({
                   key={step.step}
                   className="min-w-0 overflow-hidden rounded-xl border border-white/10 bg-slate-950/70 p-3.5 text-xs"
                 >
-                  <div className="flex flex-wrap items-center justify-between gap-2">
+                  <div className="flex flex-col items-start gap-1.5">
+                    <span className="inline-block whitespace-nowrap rounded-md bg-cyan-500/15 px-2 py-0.5 font-mono text-[10px] font-semibold text-cyan-300 ring-1 ring-cyan-500/25">
+                      {step.category} • {step.priority}
+                    </span>
                     <span className="font-bold text-white">
                       Bước {step.step}: {step.title}
-                    </span>
-                    <span className="shrink-0 whitespace-nowrap rounded-md bg-cyan-500/15 px-2 py-0.5 font-mono text-[10px] font-medium text-cyan-300 ring-1 ring-cyan-500/20">
-                      {step.category} • {step.priority}
                     </span>
                   </div>
                   <p className="mt-1.5 [overflow-wrap:anywhere] text-slate-300">{step.description}</p>
