@@ -63,6 +63,8 @@ export default function TrustRecoverCopilot({
 }: TrustRecoverCopilotProps) {
   const [open, setOpen] = useState(false);
   const [input, setInput] = useState("");
+  const [isWide, setIsWide] = useState(false);
+  const [showQuickPrompts, setShowQuickPrompts] = useState(false);
   const [attachedFile, setAttachedFile] = useState<File | null>(null);
   const [loading, setLoading] = useState(false);
   const [reply, setReply] = useState<string | null>(
@@ -178,7 +180,7 @@ export default function TrustRecoverCopilot({
         <div
           className={`${
             isTopSide ? "mt-3" : "mb-3"
-          } w-[350px] max-w-[calc(100vw-2rem)] overflow-hidden rounded-2xl border border-slate-200 bg-white text-slate-900 shadow-2xl`}
+          } ${isWide ? "w-[540px] max-w-[min(560px,calc(100vw-2rem))]" : "w-[350px] max-w-[calc(100vw-2rem)]"} transition-all duration-200 overflow-hidden rounded-2xl border border-slate-200 bg-white text-slate-900 shadow-2xl`}
         >
           <div
             onPointerDown={onPointerDownDrag}
@@ -198,37 +200,68 @@ export default function TrustRecoverCopilot({
                 </div>
               </div>
             </div>
-            <button
-              type="button"
-              onClick={() => setOpen(false)}
-              className="rounded-lg px-2 py-1 text-xs font-bold text-slate-400 hover:bg-slate-200 hover:text-slate-700"
-            >
-              ✕
-            </button>
+            <div className="flex items-center gap-1">
+              <button
+                type="button"
+                onPointerDown={(e) => e.stopPropagation()}
+                onClick={() => setIsWide((v) => !v)}
+                title={isWide ? "Thu gọn chiều rộng" : "Mở rộng chiều rộng"}
+                className="rounded-lg px-2 py-1 text-xs font-bold text-slate-400 hover:bg-slate-200 hover:text-slate-700"
+              >
+                {isWide ? "⇥⇤" : "⇤⇥"}
+              </button>
+              <button
+                type="button"
+                onPointerDown={(e) => e.stopPropagation()}
+                onClick={() => setOpen(false)}
+                className="rounded-lg px-2 py-1 text-xs font-bold text-slate-400 hover:bg-slate-200 hover:text-slate-700"
+              >
+                ✕
+              </button>
+            </div>
           </div>
 
           <div className="space-y-3 p-4 text-xs">
             {reply && (
-              <div className="rounded-xl border border-cyan-600/20 bg-cyan-50 p-3 leading-relaxed text-slate-800">
+              <div className="max-h-60 overflow-y-auto rounded-xl border border-cyan-600/20 bg-cyan-50 p-3 leading-relaxed text-slate-800">
                 {reply}
               </div>
             )}
 
             <div className="space-y-1.5">
-              <div className="text-[10px] font-bold uppercase tracking-wider text-slate-500">
-                Gợi ý bấm nhanh:
-              </div>
-              {QUICK_PROMPTS.map((qp, idx) => (
+              <div className="flex items-center justify-between">
                 <button
-                  key={idx}
                   type="button"
-                  disabled={loading}
-                  onClick={() => sendPrompt(qp, null)}
-                  className="block w-full rounded-lg border border-slate-200 bg-slate-50 px-2.5 py-1.5 text-left text-[11px] font-medium text-slate-700 transition hover:border-cyan-500/40 hover:bg-cyan-50 hover:text-cyan-800"
+                  onClick={() => setShowQuickPrompts((v) => !v)}
+                  title="Gợi ý bấm nhanh"
+                  className="inline-flex h-7 w-7 items-center justify-center rounded-full border border-slate-200 bg-slate-50 text-xs text-cyan-700 shadow-sm transition hover:border-cyan-500/50 hover:bg-cyan-50"
                 >
-                  → {qp}
+                  ⚡
                 </button>
-              ))}
+                {showQuickPrompts && (
+                  <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
+                    Gợi ý bấm nhanh
+                  </span>
+                )}
+              </div>
+              {showQuickPrompts && (
+                <div className="space-y-1.5">
+                  {QUICK_PROMPTS.map((qp, idx) => (
+                    <button
+                      key={idx}
+                      type="button"
+                      disabled={loading}
+                      onClick={() => {
+                        setShowQuickPrompts(false);
+                        sendPrompt(qp, null);
+                      }}
+                      className="block w-full rounded-lg border border-slate-200 bg-slate-50 px-2.5 py-1.5 text-left text-[11px] font-medium text-slate-700 transition hover:border-cyan-500/40 hover:bg-cyan-50 hover:text-cyan-800"
+                    >
+                      → {qp}
+                    </button>
+                  ))}
+                </div>
+              )}
             </div>
 
             <form
