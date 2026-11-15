@@ -29,19 +29,24 @@ export default function ArbitrationQueue() {
   const loadQueue = useCallback(async () => {
     setLoading(true);
     try {
+      const rpc = new JsonRpcProvider("https://api.avax-test.network/ext/bc/C/rpc", {
+        chainId: 43113,
+        name: "avalanche-fuji",
+      });
+      const latest = await rpc.getBlockNumber();
+      const fromBlock = Math.max(0, latest - 1800);
       const topic0 = id("DisputeSubmitted(string,bytes32,address,uint256)");
-      const url = `https://api.routescan.io/v2/network/testnet/evm/43113/etherscan/api?module=logs&action=getLogs&address=${ARBITRATION_CONTRACT_ADDRESS}&topic0=${topic0}`;
-      const res = await fetch(url);
-      const json = (await res.json()) as { status?: string; result?: Array<{ data: string }> };
-      if (json.status !== "1" || !Array.isArray(json.result)) {
-        setItems([]);
-        return;
-      }
+      const logs = await rpc.getLogs({
+        address: ARBITRATION_CONTRACT_ADDRESS,
+        topics: [topic0],
+        fromBlock,
+        toBlock: "latest",
+      });
 
       const coder = AbiCoder.defaultAbiCoder();
       const caseIds = Array.from(
         new Set(
-          json.result
+          logs
             .map((log) => {
               try {
                 const decoded = coder.decode(["string", "uint256"], log.data);
@@ -53,11 +58,6 @@ export default function ArbitrationQueue() {
             .filter(Boolean)
         )
       ).reverse();
-
-      const rpc = new JsonRpcProvider("https://api.avax-test.network/ext/bc/C/rpc", {
-        chainId: 43113,
-        name: "avalanche-fuji",
-      });
       const c = new Contract(ARBITRATION_CONTRACT_ADDRESS, ARBITRATION_ABI, rpc);
       const loaded = await Promise.all(
         caseIds.slice(0, 15).map(async (cid) => {
