@@ -155,7 +155,7 @@ export default function ArbitrationQueue() {
           Chưa có hồ sơ ký quỹ nào trên contract Trọng tài.
         </p>
       ) : (
-        <div className="space-y-2.5">
+        <div className="max-h-72 space-y-2.5 overflow-y-auto pr-1">
           {items.map((item) => {
             const badge = STATE_BADGE[item.state] || { text: "KHÔNG RÕ", cls: "bg-slate-700 text-slate-200" };
             return (
