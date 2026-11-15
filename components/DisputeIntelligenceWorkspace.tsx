@@ -338,19 +338,6 @@ export default function DisputeIntelligenceWorkspace({
         </div>
       </form>
 
-      
-              className={`rounded-md px-2.5 py-1 font-mono text-[11px] transition ${
-                analysis?.caseId === c.caseId
-                  ? "bg-cyan-500/25 text-cyan-200 ring-1 ring-cyan-400/50"
-                  : "bg-white/5 text-slate-300 hover:bg-white/10"
-              }`}
-            >
-              {c.caseId}
-            </button>
-          ))}
-        </div>
-      )}
-
       {errorMsg && (
         <div className="mt-4 rounded-xl border border-rose-500/30 bg-rose-950/40 p-4 text-xs text-rose-200">
           <strong className="text-rose-400">Lỗi xử lý: </strong>
