@@ -12,6 +12,14 @@ const AWM_IFACE = new Interface([
   "event SendWarpMessage(address indexed sender, bytes32 indexed messageID, bytes message)",
 ]);
 
+const COMMON_DEFI_IFACE = new Interface([
+  "function transfer(address to, uint256 value)",
+  "function approve(address spender, uint256 value)",
+  "function transferFrom(address from, address to, uint256 value)",
+  "function deposit()",
+  "function withdraw(uint256 wad)",
+]);
+
 const TX_HASH_REGEX = /^0x([A-Fa-f0-9]{64})$/;
 
 export function isValidTxHash(txHash: unknown): txHash is string {
@@ -116,25 +124,31 @@ export async function verifyFujiTransaction(
       args: Record<string, string>;
     } | null = null;
 
-    if (verifiedIface && tx.data && tx.data !== "0x") {
-      try {
-        const parsedTx = verifiedIface.parseTransaction({
-          data: tx.data,
-          value: tx.value,
-        });
-        if (parsedTx) {
-          const args: Record<string, string> = {};
-          parsedTx.fragment.inputs.forEach((input, idx) => {
-            args[input.name || `arg${idx}`] = String(parsedTx.args[idx]);
+    if (tx.data && tx.data !== "0x") {
+      const txIfaces = verifiedIface
+        ? [verifiedIface, COMMON_DEFI_IFACE]
+        : [COMMON_DEFI_IFACE];
+      for (const txIface of txIfaces) {
+        try {
+          const parsedTx = txIface.parseTransaction({
+            data: tx.data,
+            value: tx.value,
           });
-          decodedFunction = {
-            name: parsedTx.name,
-            signature: parsedTx.signature,
-            args,
-          };
+          if (parsedTx) {
+            const args: Record<string, string> = {};
+            parsedTx.fragment.inputs.forEach((input, idx) => {
+              args[input.name || `arg${idx}`] = String(parsedTx.args[idx]);
+            });
+            decodedFunction = {
+              name: parsedTx.name,
+              signature: parsedTx.signature,
+              args,
+            };
+            break;
+          }
+        } catch {
+          // Ignore non-matching signature
         }
-      } catch {
-        decodedFunction = null;
       }
     }
 
