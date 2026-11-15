@@ -1,4 +1,5 @@
 "use client";
+import ArbitrationQueue from "./ArbitrationQueue";
 
 import React, { useEffect, useState } from "react";
 import {
@@ -193,6 +194,7 @@ export default function OnChainStatsAndCases({
           )}
         </div>
       )}
+      {showList && <ArbitrationQueue />}
     </div>
   );
 }
