@@ -414,11 +414,11 @@ export default function DisputeIntelligenceWorkspace({
           {/* 1. VERIFIED DỮ LIỆU GỐCS vs AI INVESTIGATION (AskPay) */}
           <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
             <div className="min-w-0 overflow-hidden rounded-2xl border border-emerald-500/30 bg-emerald-950/15 p-5">
-              <div className="flex flex-wrap items-center justify-between gap-2">
+              <div className="flex flex-col items-start gap-1.5">
                 <h3 className="text-sm font-bold text-emerald-300">
                   Dữ liệu xác thực trên Blockchain (Fuji RPC)
                 </h3>
-                <span className="shrink-0 whitespace-nowrap rounded-md bg-emerald-500/15 px-2.5 py-0.5 font-mono text-[10px] font-semibold text-emerald-300 ring-1 ring-emerald-500/30">
+                <span className="inline-block whitespace-nowrap rounded-md bg-emerald-500/15 px-2.5 py-0.5 font-mono text-[10px] font-semibold text-emerald-300 ring-1 ring-emerald-500/30">
                   DỮ LIỆU GỐC
                 </span>
               </div>
@@ -513,11 +513,11 @@ export default function DisputeIntelligenceWorkspace({
             </div>
 
             <div className="min-w-0 overflow-hidden rounded-2xl border border-cyan-500/30 bg-slate-900/70 p-5">
-              <div className="flex flex-wrap items-center justify-between gap-2">
+              <div className="flex flex-col items-start gap-1.5">
                 <h3 className="text-sm font-bold text-cyan-300">
                   AskPay – Phân tích Giao dịch On-Chain
                 </h3>
-                <span className="shrink-0 whitespace-nowrap rounded-md bg-cyan-500/15 px-2.5 py-0.5 font-mono text-[10px] font-semibold text-cyan-300 ring-1 ring-cyan-500/30">
+                <span className="inline-block whitespace-nowrap rounded-md bg-cyan-500/15 px-2.5 py-0.5 font-mono text-[10px] font-semibold text-cyan-300 ring-1 ring-cyan-500/30">
                   PHÂN TÍCH AI ({analysis.aiInvestigation.modelUsed})
                 </span>
               </div>
