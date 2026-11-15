@@ -23,7 +23,20 @@ function verdictBadgeClass(verdict: EvidenceVerdict): string {
   }
 }
 
-export default function DisputeIntelligenceWorkspace() {
+export interface WorkspacePrefill {
+  nonce: number;
+  txHash?: string;
+  userClaim?: string;
+  claimedAmountAvax?: string;
+  claimedRecipient?: string;
+  loadDemo?: boolean;
+}
+
+export default function DisputeIntelligenceWorkspace({
+  copilotPrefill,
+}: {
+  copilotPrefill?: WorkspacePrefill | null;
+}) {
   const [txHash, setTxHash] = useState("");
   const [userClaim, setUserClaim] = useState("");
   const [claimedAmountAvax, setClaimedAmountAvax] = useState("");
@@ -33,6 +46,19 @@ export default function DisputeIntelligenceWorkspace() {
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [analysis, setAnalysis] = useState<DisputeCaseAnalysis | null>(null);
   const [savedCases, setSavedCases] = useState<DisputeCaseAnalysis[]>([]);
+
+  useEffect(() => {
+    if (!copilotPrefill) return;
+    if (copilotPrefill.loadDemo) {
+      fillScenario("contradicted");
+      return;
+    }
+    if (copilotPrefill.txHash) setTxHash(copilotPrefill.txHash);
+    if (copilotPrefill.userClaim) setUserClaim(copilotPrefill.userClaim);
+    if (copilotPrefill.claimedAmountAvax) setClaimedAmountAvax(copilotPrefill.claimedAmountAvax);
+    if (copilotPrefill.claimedRecipient) setClaimedRecipient(copilotPrefill.claimedRecipient);
+    setErrorMsg(null);
+  }, [copilotPrefill]);
 
   useEffect(() => {
     try {

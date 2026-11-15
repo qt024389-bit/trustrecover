@@ -1,15 +1,25 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import type { VerifyTransactionResult } from "@/lib/avalanche/types";
 
 const SAMPLE_REAL_FUJI_HASH =
   "0x75e0dcfadff069af83e0c15369da717d5cfad1e358f2e56f54296f263492e8df";
 
-export default function FujiTransactionVerifier() {
+export default function FujiTransactionVerifier({
+  prefillTxHash,
+}: {
+  prefillTxHash?: { nonce: number; txHash: string } | null;
+}) {
   const [txHash, setTxHash] = useState("");
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<VerifyTransactionResult | null>(null);
+
+  useEffect(() => {
+    if (prefillTxHash?.txHash) {
+      setTxHash(prefillTxHash.txHash);
+    }
+  }, [prefillTxHash]);
 
   async function handleVerify(e: React.FormEvent) {
     e.preventDefault();

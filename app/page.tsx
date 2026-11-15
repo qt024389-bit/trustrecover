@@ -2,7 +2,8 @@
 
 import React, { useState } from "react";
 import TrustRecoverLogo from "@/components/TrustRecoverLogo";
-import DisputeIntelligenceWorkspace from "@/components/DisputeIntelligenceWorkspace";
+import DisputeIntelligenceWorkspace, { WorkspacePrefill } from "@/components/DisputeIntelligenceWorkspace";
+import TrustRecoverCopilot, { CopilotActionPayload } from "@/components/TrustRecoverCopilot";
 import FujiTransactionVerifier from "@/components/FujiTransactionVerifier";
 import OnChainStatsAndCases from "@/components/OnChainStatsAndCases";
 import ReviewerManagerPanel from "@/components/ReviewerManagerPanel";
@@ -53,6 +54,18 @@ const TAB_META: Record<WorkspaceTab, { title: string; subtitle: string }> = {
 
 export default function Home() {
   const [activeTab, setActiveTab] = useState<WorkspaceTab>("dashboard");
+  const [workspacePrefill, setWorkspacePrefill] = useState<WorkspacePrefill | null>(null);
+  const [auditPrefill, setAuditPrefill] = useState<{ nonce: number; txHash: string } | null>(null);
+
+  function handleCopilotAction(action: CopilotActionPayload) {
+    setActiveTab(action.targetTab);
+    const nonce = Date.now();
+    if (action.targetTab === "analysis" && action.autoFill) {
+      setWorkspacePrefill({ nonce, ...action.autoFill });
+    } else if (action.targetTab === "audit" && action.autoFill?.txHash) {
+      setAuditPrefill({ nonce, txHash: action.autoFill.txHash });
+    }
+  }
   const currentMeta = TAB_META[activeTab];
 
   return (
@@ -219,7 +232,7 @@ export default function Home() {
 
             {/* TAB 3: PHAN TICH BANG CHUNG */}
             <div className={activeTab === "analysis" ? "block" : "hidden"}>
-              <DisputeIntelligenceWorkspace />
+              <DisputeIntelligenceWorkspace copilotPrefill={workspacePrefill} />
             </div>
 
             {/* TAB 4: KIEM TRA AVALANCHE */}
@@ -242,7 +255,7 @@ export default function Home() {
                 </a>
               </div>
               <ReportIntegrityVerifier />
-              <FujiTransactionVerifier />
+              <FujiTransactionVerifier prefillTxHash={auditPrefill} />
             </div>
 
             {/* TAB 5: CAI DAT */}
@@ -279,6 +292,7 @@ export default function Home() {
           </footer>
         </section>
       </div>
+          <TrustRecoverCopilot onExecuteAction={handleCopilotAction} />
     </main>
   );
 }
