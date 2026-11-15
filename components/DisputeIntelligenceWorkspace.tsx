@@ -425,7 +425,7 @@ export default function DisputeIntelligenceWorkspace({
 
           {/* 1. VERIFIED DỮ LIỆU GỐCS vs AI INVESTIGATION (AskPay) */}
           <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
-            <div className="rounded-2xl border border-emerald-500/30 bg-emerald-950/15 p-5">
+            <div className="min-w-0 overflow-hidden rounded-2xl border border-emerald-500/30 bg-emerald-950/15 p-5">
               <div className="flex flex-wrap items-center justify-between gap-2">
                 <h3 className="text-sm font-bold text-emerald-300">
                   Dữ liệu xác thực trên Blockchain (Fuji RPC)
@@ -514,7 +514,7 @@ export default function DisputeIntelligenceWorkspace({
                 <div className="text-xs font-semibold text-emerald-300">
                   Sự kiện xác minh trực tiếp (AskPay Verified Facts):
                 </div>
-                <ul className="mt-1.5 list-disc space-y-1 pl-4 text-xs text-slate-200">
+                <ul className="mt-1.5 list-disc space-y-1 break-words pl-4 text-xs text-slate-200">
                   {analysis.aiInvestigation.askPay.verifiedBlockchainFacts.map(
                     (fact, i) => (
                       <li key={i}>{fact}</li>
@@ -524,7 +524,7 @@ export default function DisputeIntelligenceWorkspace({
               </div>
             </div>
 
-            <div className="rounded-2xl border border-cyan-500/30 bg-slate-900/70 p-5">
+            <div className="min-w-0 overflow-hidden rounded-2xl border border-cyan-500/30 bg-slate-900/70 p-5">
               <div className="flex flex-wrap items-center justify-between gap-2">
                 <h3 className="text-sm font-bold text-cyan-300">
                   AskPay – Phân tích Giao dịch On-Chain
@@ -562,7 +562,7 @@ export default function DisputeIntelligenceWorkspace({
                   <div className="text-xs font-semibold text-amber-300">
                     Thông tin chưa đủ cơ sở xác minh on-chain:
                   </div>
-                  <ul className="mt-1 list-disc space-y-1 pl-4 text-xs text-slate-300">
+                  <ul className="mt-1 list-disc space-y-1 break-words pl-4 text-xs text-slate-300">
                     {analysis.aiInvestigation.askPay.unverifiedOrInsufficientData.map(
                       (item, i) => (
                         <li key={i}>{item}</li>

@@ -148,6 +148,8 @@ export default function Home() {
               </button>
             </header>
 
+            <TrustRecoverCopilot onExecuteAction={handleCopilotAction} />
+
             {/* TAB 1: TONG QUAN */}
             <div className={activeTab === "dashboard" ? "block space-y-8" : "hidden"}>
               <OnChainStatsAndCases />
@@ -292,7 +294,7 @@ export default function Home() {
           </footer>
         </section>
       </div>
-          <TrustRecoverCopilot onExecuteAction={handleCopilotAction} />
+    
     </main>
   );
 }
