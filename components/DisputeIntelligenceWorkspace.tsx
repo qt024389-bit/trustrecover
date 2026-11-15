@@ -748,6 +748,69 @@ export default function DisputeIntelligenceWorkspace({
             </div>
           </div>
 
+                    {(analysis.crossEngineCheck || analysis.recoveryReadiness) && (
+            <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
+              {analysis.crossEngineCheck && (
+                <div className="rounded-2xl border border-white/10 bg-slate-900/70 p-5">
+                  <div className="flex flex-wrap items-center justify-between gap-2">
+                    <h4 className="text-xs font-bold uppercase tracking-wider text-cyan-300">
+                      Kiểm tra chéo 3 Engine (Cross-Engine Check)
+                    </h4>
+                    <span className={`whitespace-nowrap rounded-full px-2.5 py-0.5 text-[11px] font-semibold ${analysis.crossEngineCheck.consistent ? "bg-emerald-500/20 text-emerald-300" : "bg-rose-500/20 text-rose-300"}`}>
+                      {analysis.crossEngineCheck.consistent ? "ĐỒNG NHẤT" : "PHÁT HIỆN MÂU THUẪN"}
+                    </span>
+                  </div>
+                  <p className="mt-2.5 text-xs leading-relaxed text-slate-200">
+                    {analysis.crossEngineCheck.finalTransparentConclusion}
+                  </p>
+                  {analysis.crossEngineCheck.requiresHumanReview && (
+                    <div className="mt-2.5 rounded-lg border border-amber-500/30 bg-amber-950/30 px-3 py-1.5 text-[11px] text-amber-200">
+                      Yêu cầu Human Reviewer kiểm duyệt trước khi neo kết quả.
+                    </div>
+                  )}
+                  {analysis.crossEngineCheck.conflictsDetected.length > 0 && (
+                    <ul className="mt-2.5 list-disc space-y-1 pl-4 text-[11px] text-rose-200">
+                      {analysis.crossEngineCheck.conflictsDetected.map((item, idx) => (
+                        <li key={idx}>{item}</li>
+                      ))}
+                    </ul>
+                  )}
+                </div>
+              )}
+
+              {analysis.recoveryReadiness && (
+                <div className="rounded-2xl border border-white/10 bg-slate-900/70 p-5">
+                  <div className="flex flex-wrap items-center justify-between gap-2">
+                    <h4 className="text-xs font-bold uppercase tracking-wider text-cyan-300">
+                      Phân rã Điểm Sẵn sàng (Recovery Readiness)
+                    </h4>
+                    <span className="whitespace-nowrap rounded-full bg-cyan-500/20 px-2.5 py-0.5 text-[11px] font-bold text-cyan-200">
+                      {analysis.recoveryReadiness.score}/100 • {analysis.recoveryReadiness.level}
+                    </span>
+                  </div>
+                  {analysis.recoveryReadiness.capApplied && (
+                    <div className="mt-2 rounded-lg border border-rose-500/30 bg-rose-950/30 px-3 py-1.5 text-[11px] text-rose-200">
+                      Giới hạn trần điểm: {analysis.recoveryReadiness.capApplied}
+                    </div>
+                  )}
+                  <div className="mt-3 space-y-2">
+                    {analysis.recoveryReadiness.factors.map((f, idx) => (
+                      <div key={idx} className="rounded-xl border border-white/5 bg-slate-950/60 p-2.5">
+                        <div className="flex items-center justify-between gap-2 text-xs">
+                          <span className="font-semibold text-slate-200">{f.factor}</span>
+                          <span className={`whitespace-nowrap font-mono text-[11px] font-bold ${f.status === "PASS" ? "text-emerald-300" : f.status === "PARTIAL" ? "text-amber-300" : "text-rose-300"}`}>
+                            {f.points}/{f.maxPoints} ({f.status})
+                          </span>
+                        </div>
+                        <p className="mt-1 text-[11px] text-slate-400">{f.explanation}</p>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
+
           {/* 4. AUDIT HISTORY & HUMAN REVIEWER VALIDATION */}
           <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
             <div className="rounded-2xl border border-white/10 bg-slate-900/70 p-4 lg:col-span-2">
