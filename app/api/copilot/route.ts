@@ -134,7 +134,8 @@ Nếu có tệp hoặc hình ảnh đính kèm:
 
     let responseText: string | undefined;
     let lastErrMsg = "";
-    for (const model of models) {
+    const attemptModels = [...models, models[0]];
+    for (const model of attemptModels) {
       try {
         const res = await Promise.race([
           ai.models.generateContent({
@@ -153,6 +154,9 @@ Nếu có tệp hoặc hình ảnh đính kèm:
         if (responseText) break;
       } catch (err) {
         lastErrMsg = err instanceof Error ? err.message : String(err);
+        if (lastErrMsg.includes("503") || lastErrMsg.includes("UNAVAILABLE") || lastErrMsg.includes("high demand")) {
+          await new Promise((r) => setTimeout(r, 1200));
+        }
         continue;
       }
     }
