@@ -393,7 +393,7 @@ export default function DisputeIntelligenceWorkspace({
                 )}
               </div>
               <p className="mt-1 text-[11px] text-slate-400">
-                Nguồn: Avalanche Fuji RPC (ethers.js) — Tách biệt hoàn toàn với suy luận AI
+                Nguồn: {network === "dispatch" ? "Dispatch L1 RPC" : network === "mainnet" ? "Avalanche Mainnet RPC" : "Avalanche Fuji RPC"} (ethers.js) — Tách biệt hoàn toàn với suy luận AI
               </p>
             </div>
 
@@ -431,7 +431,7 @@ export default function DisputeIntelligenceWorkspace({
             <div className="min-w-0 overflow-hidden rounded-2xl border border-emerald-500/30 bg-emerald-950/15 p-5">
               <div className="flex flex-col items-start gap-1.5">
                 <h3 className="text-sm font-bold text-emerald-300">
-                  Dữ liệu xác thực trên Blockchain (Fuji RPC)
+                  Dữ liệu xác thực trên Blockchain ({network === "dispatch" ? "Dispatch L1 RPC" : network === "mainnet" ? "Avalanche Mainnet RPC" : "Avalanche Fuji RPC"})
                 </h3>
                 <span className="inline-block whitespace-nowrap rounded-md bg-emerald-500/15 px-2.5 py-0.5 font-mono text-[10px] font-semibold text-emerald-300 ring-1 ring-emerald-500/30">
                   DỮ LIỆU GỐC
