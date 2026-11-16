@@ -5,10 +5,14 @@ import React, { useEffect, useRef, useState } from "react";
 export interface CopilotActionPayload {
   targetTab: "dashboard" | "cases" | "analysis" | "audit" | "settings";
   autoFill?: {
+    network?: "fuji" | "dispatch" | "mainnet";
     txHash?: string;
     userClaim?: string;
     claimedAmountAvax?: string;
+    claimedAsset?: string;
     claimedRecipient?: string;
+    claimedSender?: string;
+    evidenceFile?: File;
     loadDemo?: boolean;
   };
 }
@@ -145,10 +149,13 @@ export default function TrustRecoverCopilot({
         setReply(json.error || "Không thể xử lý yêu cầu lúc này.");
       } else {
         setReply(json.data.reply);
-        if ((json.data.targetTab && json.data.targetTab !== "none") || json.data.autoFill) {
+        if ((json.data.targetTab && json.data.targetTab !== "none") || json.data.autoFill || f) {
           onExecuteAction({
             targetTab: json.data.targetTab && json.data.targetTab !== "none" ? json.data.targetTab : "analysis",
-            autoFill: json.data.autoFill,
+            autoFill: {
+              ...(json.data.autoFill || {}),
+              ...(f ? { evidenceFile: f } : {}),
+            },
           });
         }
         setInput("");

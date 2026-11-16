@@ -13,10 +13,13 @@ const COPILOT_SCHEMA: Schema = {
     autoFill: {
       type: Type.OBJECT,
       properties: {
+        network: { type: Type.STRING },
         txHash: { type: Type.STRING },
         userClaim: { type: Type.STRING },
         claimedAmountAvax: { type: Type.STRING },
+        claimedAsset: { type: Type.STRING },
         claimedRecipient: { type: Type.STRING },
+        claimedSender: { type: Type.STRING },
         loadDemo: { type: Type.BOOLEAN },
       },
     },
@@ -104,7 +107,14 @@ Hãy chọn đúng targetTab:
 
 Nếu có tệp hoặc hình ảnh đính kèm:
 - Đọc kỹ mọi chữ, mã 0x (txHash 66 ký tự hoặc địa chỉ ví 42 ký tự), số tiền AVAX, và nội dung trong tệp/ảnh.
-- Tự động điền các thông tin trích xuất được vào autoFill (txHash, claimedRecipient, claimedAmountAvax, userClaim).
+- Tự động điền ĐẦY ĐỦ và CHÍNH XÁC các thông tin trích xuất được vào autoFill:
+  + network: "mainnet" (nếu Avalanche C-Chain Mainnet / 43114), "fuji" (nếu Fuji / 43113), hoặc "dispatch" (nếu Dispatch L1 / 779672).
+  + txHash: đúng mã giao dịch 0x...
+  + claimedAmountAvax: CHỈ điền phần số thuần (VD: "16000", "4.9894", "8000"), KHÔNG kèm chữ đơn vị.
+  + claimedAsset: đúng đơn vị tiền tệ ("AVAX", "WETH.e", "USDC", "WBTC.e", "USDT.e", hoặc "USD").
+  + claimedRecipient: đúng địa chỉ ví nhận 0x...
+  + claimedSender: địa chỉ người gửi hoặc hợp đồng gửi/khai thác 0x... (nếu có trong tệp).
+  + userClaim: nội dung khiếu nại đầy đủ, ghi rõ cả địa chỉ người gửi/hợp đồng gửi nếu có.
 - Trò chuyện tự nhiên, thân thiện và giải thích rõ ràng bằng tiếng Việt như một chuyên gia hỗ trợ người dùng DeFi. Chỉ chọn targetTab khác "none" khi người dùng thực sự muốn mở tab, chạy mẫu hoặc điền biểu mẫu; nếu họ chỉ đang hỏi đáp/tìm hiểu thì đặt targetTab = "none" để không làm gián đoạn màn hình hiện tại.
 `.trim();
 

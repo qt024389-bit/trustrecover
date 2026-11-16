@@ -26,10 +26,14 @@ function verdictBadgeClass(verdict: EvidenceVerdict): string {
 
 export interface WorkspacePrefill {
   nonce: number;
+  network?: "fuji" | "dispatch" | "mainnet";
   txHash?: string;
   userClaim?: string;
   claimedAmountAvax?: string;
+  claimedAsset?: string;
   claimedRecipient?: string;
+  claimedSender?: string;
+  evidenceFile?: File;
   loadDemo?: boolean;
 }
 
@@ -60,10 +64,24 @@ export default function DisputeIntelligenceWorkspace({
       fillScenario("contradicted");
       return;
     }
+    if (copilotPrefill.network) setNetwork(copilotPrefill.network);
     if (copilotPrefill.txHash) setTxHash(copilotPrefill.txHash);
-    if (copilotPrefill.userClaim) setUserClaim(copilotPrefill.userClaim);
     if (copilotPrefill.claimedAmountAvax) setClaimedAmountAvax(copilotPrefill.claimedAmountAvax);
+    if (copilotPrefill.claimedAsset) setClaimedAsset(copilotPrefill.claimedAsset);
     if (copilotPrefill.claimedRecipient) setClaimedRecipient(copilotPrefill.claimedRecipient);
+    if (copilotPrefill.userClaim) {
+      const senderNote =
+        copilotPrefill.claimedSender && !copilotPrefill.userClaim.includes(copilotPrefill.claimedSender)
+          ? ` (Người gửi/Hợp đồng: ${copilotPrefill.claimedSender})`
+          : "";
+      setUserClaim(copilotPrefill.userClaim + senderNote);
+    }
+    if (copilotPrefill.evidenceFile) {
+      const f = copilotPrefill.evidenceFile;
+      setSelectedFiles((prev) =>
+        prev.some((x) => x.name === f.name && x.size === f.size) ? prev : [...prev, f]
+      );
+    }
     setErrorMsg(null);
   }, [copilotPrefill]);
 
