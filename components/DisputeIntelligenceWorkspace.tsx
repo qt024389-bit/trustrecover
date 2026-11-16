@@ -46,6 +46,7 @@ export default function DisputeIntelligenceWorkspace({
   const [network, setNetwork] = useState<"fuji" | "dispatch" | "mainnet">("fuji");
   const [userClaim, setUserClaim] = useState("");
   const [claimedAmountAvax, setClaimedAmountAvax] = useState("");
+  const [claimedAsset, setClaimedAsset] = useState("AVAX");
   const [claimedRecipient, setClaimedRecipient] = useState("");
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
   const [loading, setLoading] = useState(false);
@@ -96,6 +97,7 @@ export default function DisputeIntelligenceWorkspace({
     if (type === "contradicted") {
       setTxHash(DEMO_FUJI_TX);
       setClaimedAmountAvax("25.5");
+    setClaimedAsset("AVAX");
       setClaimedRecipient("0x13f452C47AfeFC53A36F30afb8105F53C89f838E");
       setUserClaim(
         "Tôi đã chuyển 25.5 AVAX trực tiếp vào hợp đồng 0x13f452C47AfeFC53A36F30afb8105F53C89f838E để tham gia pool thanh khoản, nhưng bên đối tác báo chưa nhận được tiền và từ chối hoàn trả."
@@ -103,6 +105,7 @@ export default function DisputeIntelligenceWorkspace({
     } else if (type === "verified") {
       setTxHash(DEMO_FUJI_TX);
       setClaimedAmountAvax("0");
+    setClaimedAsset("AVAX");
       setClaimedRecipient("0x13f452C47AfeFC53A36F30afb8105F53C89f83BE");
       setUserClaim(
         "Tôi đã gửi lệnh tương tác hợp đồng thông minh (0 AVAX native) tới địa chỉ 0x13f452C47AfeFC53A36F30afb8105F53C89f83BE trên Avalanche Fuji Testnet, giao dịch đã xác nhận thành công."
@@ -110,6 +113,7 @@ export default function DisputeIntelligenceWorkspace({
     } else {
       setTxHash("0x" + "0".repeat(64));
       setClaimedAmountAvax("10");
+    setClaimedAsset("AVAX");
       setClaimedRecipient("0x13f452C47AfeFC53A36F30afb8105F53C89f83BE");
       setUserClaim(
         "Đối tác gửi cho tôi mã giao dịch này và khẳng định đã hoàn trả 10 AVAX thành công trên Avalanche Fuji."
@@ -141,7 +145,7 @@ export default function DisputeIntelligenceWorkspace({
       formData.append("network", network);
       formData.append("userClaim", userClaim);
       if (claimedAmountAvax) {
-        formData.append("claimedAmountAvax", claimedAmountAvax);
+        formData.append("claimedAmountAvax", claimedAsset === "AVAX" ? claimedAmountAvax : `${claimedAmountAvax} ${claimedAsset}`);
       }
       if (claimedRecipient) {
         formData.append("claimedRecipient", claimedRecipient);
@@ -275,13 +279,27 @@ export default function DisputeIntelligenceWorkspace({
               <label className="block text-xs font-medium text-slate-300">
                 Số tiền khiếu nại (AVAX)
               </label>
-              <input
+              <div className="flex gap-2">
+                  <input
                 type="text"
                 value={claimedAmountAvax}
                 onChange={(e) => setClaimedAmountAvax(e.target.value)}
                 placeholder="Ví dụ: 25.5"
                 className="mt-1 w-full rounded-xl border border-white/10 bg-slate-900/90 px-3.5 py-2 text-xs text-white placeholder-slate-500 focus:border-cyan-400 focus:outline-none"
               />
+                  <select
+                    value={claimedAsset}
+                    onChange={(e) => setClaimedAsset(e.target.value)}
+                    className="w-28 shrink-0 rounded-xl border border-slate-700 bg-slate-950/90 px-2.5 py-2.5 text-sm text-slate-100 outline-none focus:border-cyan-400"
+                  >
+                    <option value="AVAX">AVAX</option>
+                    <option value="WETH.e">WETH.e</option>
+                    <option value="USDC">USDC</option>
+                    <option value="WBTC.e">WBTC.e</option>
+                    <option value="USDT.e">USDT.e</option>
+                    <option value="USD">USD</option>
+                  </select>
+                </div>
             </div>
             <div>
               <label className="block text-xs font-medium text-slate-300">
