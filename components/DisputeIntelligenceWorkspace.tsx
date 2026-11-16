@@ -68,7 +68,7 @@ export default function DisputeIntelligenceWorkspace({
     if (copilotPrefill.txHash) setTxHash(copilotPrefill.txHash);
     const claimText = copilotPrefill.userClaim || "";
     const amtMatch = claimText.match(/([0-9][0-9.,]*)\s*(USDT\.e|WETH\.e|WBTC\.e|USDC|AVAX|USD)\b/i);
-    const recMatch = claimText.match(/(?:vá»\s+(?:Ä‘á»‹a\s+chá»‰\s+)?vÃ­|vá»\s+Ä‘á»‹a\s+chá»‰|Ä‘á»‹a\s+chá»‰\s+nháº­n[^0x]*|tá»›i\s+(?:Ä‘á»‹a\s+chá»‰\s+)?vÃ­|tá»›i\s+Ä‘á»‹a\s+chá»‰|Ä‘áº¿n\s+(?:Ä‘á»‹a\s+chá»‰\s+)?vÃ­|recipient[^0x]*)(0x[a-fA-F0-9]{40})/i);
+    const recMatch = claimText.match(/(?:về\s+(?:địa\s+chỉ\s+)?ví|về\s+địa\s+chỉ|địa\s+chỉ\s+nhận[^0x]*|tới\s+(?:địa\s+chỉ\s+)?ví|tới\s+địa\s+chỉ|đến\s+(?:địa\s+chỉ\s+)?ví|recipient[^0x]*)(0x[a-fA-F0-9]{40})/i);
 
     const rawAmt = copilotPrefill.claimedAmountAvax || (amtMatch ? amtMatch[1].replace(/,/g, "") : "");
     if (rawAmt) setClaimedAmountAvax(rawAmt.replace(/,/g, "").replace(/[^0-9.]/g, ""));
@@ -89,7 +89,7 @@ export default function DisputeIntelligenceWorkspace({
     if (copilotPrefill.userClaim) {
       const senderNote =
         copilotPrefill.claimedSender && !copilotPrefill.userClaim.includes(copilotPrefill.claimedSender)
-          ? ` (NgÆ°á»i gá»­i/Há»£p Ä‘á»“ng: ${copilotPrefill.claimedSender})`
+          ? ` (Người gửi/Hợp đồng: ${copilotPrefill.claimedSender})`
           : "";
       setUserClaim(copilotPrefill.userClaim + senderNote);
     }
@@ -135,7 +135,7 @@ export default function DisputeIntelligenceWorkspace({
     setClaimedAsset("AVAX");
       setClaimedRecipient("0x13f452C47AfeFC53A36F30afb8105F53C89f838E");
       setUserClaim(
-        "TÃ´i Ä‘Ã£ chuyá»ƒn 25.5 AVAX trá»±c tiáº¿p vÃ o há»£p Ä‘á»“ng 0x13f452C47AfeFC53A36F30afb8105F53C89f838E Ä‘á»ƒ tham gia pool thanh khoáº£n, nhÆ°ng bÃªn Ä‘á»‘i tÃ¡c bÃ¡o chÆ°a nháº­n Ä‘Æ°á»£c tiá»n vÃ  tá»« chá»‘i hoÃ n tráº£."
+        "Tôi đã chuyển 25.5 AVAX trực tiếp vào hợp đồng 0x13f452C47AfeFC53A36F30afb8105F53C89f838E để tham gia pool thanh khoản, nhưng bên đối tác báo chưa nhận được tiền và từ chối hoàn trả."
       );
     } else if (type === "verified") {
       setTxHash(DEMO_FUJI_TX);
@@ -143,7 +143,7 @@ export default function DisputeIntelligenceWorkspace({
     setClaimedAsset("AVAX");
       setClaimedRecipient("0x13f452C47AfeFC53A36F30afb8105F53C89f83BE");
       setUserClaim(
-        "TÃ´i Ä‘Ã£ gá»­i lá»‡nh tÆ°Æ¡ng tÃ¡c há»£p Ä‘á»“ng thÃ´ng minh (0 AVAX native) tá»›i Ä‘á»‹a chá»‰ 0x13f452C47AfeFC53A36F30afb8105F53C89f83BE trÃªn Avalanche Fuji Testnet, giao dá»‹ch Ä‘Ã£ xÃ¡c nháº­n thÃ nh cÃ´ng."
+        "Tôi đã gửi lệnh tương tác hợp đồng thông minh (0 AVAX native) tới địa chỉ 0x13f452C47AfeFC53A36F30afb8105F53C89f83BE trên Avalanche Fuji Testnet, giao dịch đã xác nhận thành công."
       );
     } else {
       setTxHash("0x" + "0".repeat(64));
@@ -151,7 +151,7 @@ export default function DisputeIntelligenceWorkspace({
     setClaimedAsset("AVAX");
       setClaimedRecipient("0x13f452C47AfeFC53A36F30afb8105F53C89f83BE");
       setUserClaim(
-        "Äá»‘i tÃ¡c gá»­i cho tÃ´i mÃ£ giao dá»‹ch nÃ y vÃ  kháº³ng Ä‘á»‹nh Ä‘Ã£ hoÃ n tráº£ 10 AVAX thÃ nh cÃ´ng trÃªn Avalanche Fuji."
+        "Đối tác gửi cho tôi mã giao dịch này và khẳng định đã hoàn trả 10 AVAX thành công trên Avalanche Fuji."
       );
     }
   }
@@ -197,7 +197,7 @@ export default function DisputeIntelligenceWorkspace({
 
       if (!res.ok || !json.success) {
         setErrorMsg(
-          json?.error?.message || "KhÃ´ng thá»ƒ thá»±c hiá»‡n phÃ¢n tÃ­ch há»“ sÆ¡ tranh cháº¥p."
+          json?.error?.message || "Không thể thực hiện phân tích hồ sơ tranh chấp."
         );
       } else {
         const resultData = json.data as DisputeCaseAnalysis;
@@ -205,7 +205,7 @@ export default function DisputeIntelligenceWorkspace({
         saveCaseLocally(resultData);
       }
     } catch {
-      setErrorMsg("Lá»—i káº¿t ná»‘i Ä‘áº¿n mÃ¡y chá»§ phÃ¢n tÃ­ch AI Dispute Pipeline.");
+      setErrorMsg("Lỗi kết nối đến máy chủ phân tích AI Dispute Pipeline.");
     } finally {
       setLoading(false);
     }
@@ -217,8 +217,8 @@ export default function DisputeIntelligenceWorkspace({
     if (!analysis) return;
     const actionNote =
       newStatus === "APPROVED_BY_REVIEWER"
-        ? "Human Reviewer Ä‘Ã£ kiá»ƒm tra Ä‘á»‘i chiáº¿u vÃ  phÃª duyá»‡t káº¿t luáº­n Ä‘iá»u tra."
-        : "Human Reviewer Ä‘Ã£ Ä‘Ã¡nh dáº¥u há»“ sÆ¡ cáº§n Ä‘iá»u tra chuyÃªn sÃ¢u bá»• sung.";
+        ? "Human Reviewer đã kiểm tra đối chiếu và phê duyệt kết luận điều tra."
+        : "Human Reviewer đã đánh dấu hồ sơ cần điều tra chuyên sâu bổ sung.";
 
     setAnalysis({
       ...analysis,
@@ -242,17 +242,17 @@ export default function DisputeIntelligenceWorkspace({
         <div>
           <div className="flex flex-wrap items-center gap-2">
             <span className="rounded-full bg-cyan-500/15 px-3 py-1 text-xs font-semibold text-cyan-300 ring-1 ring-cyan-400/30">
-              LUá»’NG ÄIá»€U TRA TRANH CHáº¤P AI Há»¢P NHáº¤T
+              LUỒNG ĐIỀU TRA TRANH CHẤP AI HỢP NHẤT
             </span>
             <span className="rounded-full bg-white/5 px-3 py-1 text-xs text-slate-300 ring-1 ring-white/10">
-              AskPay â€¢ DoubtStamp â€¢ LEGALMIND
+              AskPay • DoubtStamp • LEGALMIND
             </span>
           </div>
           <h2 className="mt-2 text-xl font-bold tracking-tight text-white">
-            KhÃ´ng gian PhÃ¢n tÃ­ch Báº±ng chá»©ng & Há»— trá»£ Xá»­ lÃ½ Tranh cháº¥p
+            Không gian Phân tích Bằng chứng & Hỗ trợ Xử lý Tranh chấp
           </h2>
           <p className="mt-1 text-xs text-slate-400">
-            AI Ä‘iá»u tra â€¢ XÃ¡c minh dá»¯ liá»‡u Ä‘a máº¡ng Avalanche (43114 â€¢ 43113 â€¢ 779672) â€¢ Con ngÆ°á»i xÃ¡c nháº­n káº¿t quáº£
+            AI điều tra • Xác minh dữ liệu đa mạng Avalanche (43114 • 43113 • 779672) • Con người xác nhận kết quả
           </p>
         </div>
 
@@ -262,21 +262,21 @@ export default function DisputeIntelligenceWorkspace({
             onClick={() => fillScenario("contradicted")}
             className="rounded-lg border border-rose-500/30 bg-rose-500/10 px-3 py-1.5 text-[11px] font-medium text-rose-200 hover:bg-rose-500/20"
           >
-            Máº«u 1: Khai sai (MÃ¢u thuáº«n)
+            Mẫu 1: Khai sai (Mâu thuẫn)
           </button>
           <button
             type="button"
             onClick={() => fillScenario("verified")}
             className="rounded-lg border border-emerald-500/30 bg-emerald-500/10 px-3 py-1.5 text-[11px] font-medium text-emerald-200 hover:bg-emerald-500/20"
           >
-            Máº«u 2: Khá»›p On-Chain
+            Mẫu 2: Khớp On-Chain
           </button>
           <button
             type="button"
             onClick={() => fillScenario("notfound")}
             className="rounded-lg border border-amber-500/30 bg-amber-500/10 px-3 py-1.5 text-[11px] font-medium text-amber-200 hover:bg-amber-500/20"
           >
-            Máº«u 3: Tx khÃ´ng tá»“n táº¡i
+            Mẫu 3: Tx không tồn tại
           </button>
         </div>
       </div>
@@ -285,20 +285,20 @@ export default function DisputeIntelligenceWorkspace({
       <form onSubmit={handleSubmit} className="mt-6 grid grid-cols-1 gap-4 lg:grid-cols-3">
         <div className="space-y-3 lg:col-span-2">
           <div className="flex flex-wrap items-center gap-2">
-            <span className="text-xs font-medium text-slate-300">Máº¡ng lÆ°á»›i Avalanche:</span>
+            <span className="text-xs font-medium text-slate-300">Mạng lưới Avalanche:</span>
             <select
               value={network}
               onChange={(e) => setNetwork(e.target.value as "fuji" | "dispatch" | "mainnet")}
               className="rounded-lg border border-white/10 bg-slate-950/80 px-3 py-1.5 text-xs text-slate-100 focus:border-cyan-500 focus:outline-none"
             >
               <option value="fuji">Avalanche Fuji C-Chain (43113)</option>
-              <option value="dispatch">Dispatch L1 Testnet â€” ICM (779672)</option>
+              <option value="dispatch">Dispatch L1 Testnet — ICM (779672)</option>
               <option value="mainnet">Avalanche C-Chain Mainnet (43114)</option>
             </select>
           </div>
           <div>
             <label className="block text-xs font-medium text-slate-300">
-              1. MÃ£ giao dá»‹ch Avalanche (Transaction Hash - Báº¯t buá»™c)
+              1. Mã giao dịch Avalanche (Transaction Hash - Bắt buộc)
             </label>
             <input
               type="text"
@@ -312,14 +312,14 @@ export default function DisputeIntelligenceWorkspace({
           <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
             <div>
               <label className="block text-xs font-medium text-slate-300">
-                Sá»‘ lÆ°á»£ng tÃ i sáº£n khiáº¿u náº¡i
+                Số lượng tài sản khiếu nại
               </label>
               <div className="flex gap-2">
                   <input
                 type="text"
                 value={claimedAmountAvax}
                 onChange={(e) => setClaimedAmountAvax(e.target.value)}
-                placeholder="VÃ­ dá»¥: 25.5"
+                placeholder="Ví dụ: 25.5"
                 className="mt-1 w-full rounded-xl border border-white/10 bg-slate-900/90 px-3.5 py-2 text-xs text-white placeholder-slate-500 focus:border-cyan-400 focus:outline-none"
               />
                   <select
@@ -338,7 +338,7 @@ export default function DisputeIntelligenceWorkspace({
             </div>
             <div>
               <label className="block text-xs font-medium text-slate-300">
-                Äá»‹a chá»‰ nháº­n theo lá»i khai (0x...)
+                Địa chỉ nhận theo lời khai (0x...)
               </label>
               <input
                 type="text"
@@ -352,13 +352,13 @@ export default function DisputeIntelligenceWorkspace({
 
           <div>
             <label className="block text-xs font-medium text-slate-300">
-              2. Ná»™i dung khiáº¿u náº¡i chi tiáº¿t cá»§a ngÆ°á»i dÃ¹ng
+              2. Nội dung khiếu nại chi tiết của người dùng
             </label>
             <textarea
               rows={3}
               value={userClaim}
               onChange={(e) => setUserClaim(e.target.value)}
-              placeholder="MÃ´ táº£ chi tiáº¿t sá»± viá»‡c, sá»‘ tiá»n, thá»a thuáº­n vá»›i Ä‘á»‘i tÃ¡c vÃ  váº¥n Ä‘á» phÃ¡t sinh..."
+              placeholder="Mô tả chi tiết sự việc, số tiền, thỏa thuận với đối tác và vấn đề phát sinh..."
               className="mt-1 w-full rounded-xl border border-white/10 bg-slate-900/90 p-3 text-xs text-white placeholder-slate-500 focus:border-cyan-400 focus:outline-none"
             />
           </div>
@@ -368,10 +368,10 @@ export default function DisputeIntelligenceWorkspace({
         <div className="flex flex-col justify-between rounded-2xl border border-white/10 bg-slate-900/60 p-4">
           <div>
             <label className="block text-xs font-semibold text-cyan-300">
-              3. Táº£i lÃªn tá»‡p báº±ng chá»©ng
+              3. Tải lên tệp bằng chứng
             </label>
             <p className="mt-1 text-[11px] text-slate-400">
-              Há»— trá»£ TXT, JSON, CSV, MD, LOG, PDF, PNG, JPG (Tá»‘i Ä‘a 5 tá»‡p, má»—i tá»‡p &le; 5MB). Há»‡ thá»‘ng tá»± Ä‘á»™ng bÄƒm SHA-256 Ä‘á»ƒ cá»‘ Ä‘á»‹nh tÃ­nh toÃ n váº¹n phiÃªn báº£n.
+              Hỗ trợ TXT, JSON, CSV, MD, LOG, PDF, PNG, JPG (Tối đa 5 tệp, mỗi tệp &le; 5MB). Hệ thống tự động băm SHA-256 để cố định tính toàn vẹn phiên bản.
             </p>
             <input
               type="file"
@@ -387,7 +387,7 @@ export default function DisputeIntelligenceWorkspace({
               <ul className="mt-3 space-y-1 text-[11px] text-slate-300">
                 {selectedFiles.map((f, idx) => (
                   <li key={idx} className="truncate font-mono">
-                    â€¢ {f.name} ({(f.size / 1024).toFixed(1)} KB)
+                    • {f.name} ({(f.size / 1024).toFixed(1)} KB)
                   </li>
                 ))}
               </ul>
@@ -400,15 +400,15 @@ export default function DisputeIntelligenceWorkspace({
             className="mt-4 w-full rounded-xl bg-cyan-400 px-4 py-3 text-xs font-bold text-slate-950 shadow-lg shadow-cyan-500/20 transition hover:bg-cyan-300 disabled:opacity-50"
           >
             {loading
-              ? "Äang cháº¡y AskPay â†’ DoubtStamp â†’ LEGALMIND..."
-              : "Cháº¡y Äiá»u Tra Tranh Cháº¥p ToÃ n Diá»‡n"}
+              ? "Đang chạy AskPay → DoubtStamp → LEGALMIND..."
+              : "Chạy Điều Tra Tranh Chấp Toàn Diện"}
           </button>
         </div>
       </form>
 
       {errorMsg && (
         <div className="mt-4 rounded-xl border border-rose-500/30 bg-rose-950/40 p-4 text-xs text-rose-200">
-          <strong className="text-rose-400">Lá»—i xá»­ lÃ½: </strong>
+          <strong className="text-rose-400">Lỗi xử lý: </strong>
           {errorMsg}
         </div>
       )}
@@ -420,7 +420,7 @@ export default function DisputeIntelligenceWorkspace({
           <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
             <div className="rounded-2xl border border-white/10 bg-slate-900/70 p-4">
               <span className="text-[11px] uppercase tracking-wider text-slate-400">
-                MÃ£ Há»“ SÆ¡ & Tráº¡ng ThÃ¡i
+                Mã Hồ Sơ & Trạng Thái
               </span>
               <div className="mt-1 font-mono text-sm font-bold text-cyan-300">
                 {analysis.caseId}
@@ -432,28 +432,28 @@ export default function DisputeIntelligenceWorkspace({
 
             <div className="rounded-2xl border border-white/10 bg-slate-900/70 p-4">
               <span className="text-[11px] uppercase tracking-wider text-slate-400">
-                XÃ¡c Minh Blockchain ({analysis.onChainVerification.networkName} â€¢ {analysis.onChainVerification.chainId})
+                Xác Minh Blockchain ({analysis.onChainVerification.networkName} • {analysis.onChainVerification.chainId})
               </span>
               <div className="mt-1 text-sm font-bold">
                 {analysis.onChainVerification.verified ? (
                   <span className="text-emerald-400">
-                    âœ“ ÄÃƒ XÃC MINH ON-CHAIN (CONFIRMED)
+                    ✓ ĐÃ XÁC MINH ON-CHAIN (CONFIRMED)
                   </span>
                 ) : (
                   <span className="text-rose-400">
-                    âœ• KHÃ”NG XÃC MINH ÄÆ¯á»¢C ON-CHAIN
+                    ✕ KHÔNG XÁC MINH ĐƯỢC ON-CHAIN
                   </span>
                 )}
               </div>
               <p className="mt-1 text-[11px] text-slate-400">
-                Nguá»“n: {analysis.onChainVerification.networkName} RPC (eth_chainId: {analysis.onChainVerification.chainId}) â€” TÃ¡ch biá»‡t hoÃ n toÃ n vá»›i suy luáº­n AI
+                Nguồn: {analysis.onChainVerification.networkName} RPC (eth_chainId: {analysis.onChainVerification.chainId}) — Tách biệt hoàn toàn với suy luận AI
               </p>
             </div>
 
             <div className="rounded-2xl border border-cyan-500/30 bg-slate-900/70 p-4">
               <div className="flex flex-wrap items-center justify-between gap-2">
                 <span className="text-[11px] uppercase tracking-wider text-slate-400">
-                  Äiá»ƒm Ä‘áº§y Ä‘á»§ báº±ng chá»©ng
+                  Điểm đầy đủ bằng chứng
                 </span>
                 <span className="font-mono text-lg font-bold text-cyan-300">
                   {analysis.aiInvestigation.doubtStamp.evidenceSufficiencyScore}/100
@@ -479,15 +479,15 @@ export default function DisputeIntelligenceWorkspace({
             </div>
           </div>
 
-          {/* 1. VERIFIED Dá»® LIá»†U Gá»CS vs AI INVESTIGATION (AskPay) */}
+          {/* 1. VERIFIED DỮ LIỆU GỐCS vs AI INVESTIGATION (AskPay) */}
           <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
             <div className="min-w-0 overflow-hidden rounded-2xl border border-emerald-500/30 bg-emerald-950/15 p-5">
               <div className="flex flex-col items-start gap-1.5">
                 <h3 className="text-sm font-bold text-emerald-300">
-                  Dá»¯ liá»‡u xÃ¡c thá»±c trÃªn Blockchain ({analysis.onChainVerification.networkName} â€¢ {analysis.onChainVerification.chainId})
+                  Dữ liệu xác thực trên Blockchain ({analysis.onChainVerification.networkName} • {analysis.onChainVerification.chainId})
                 </h3>
                 <span className="inline-block whitespace-nowrap rounded-md bg-emerald-500/15 px-2.5 py-0.5 font-mono text-[10px] font-semibold text-emerald-300 ring-1 ring-emerald-500/30">
-                  Dá»® LIá»†U Gá»C
+                  DỮ LIỆU GỐC
                 </span>
               </div>
               {analysis.onChainVerification.txData ? (
@@ -529,31 +529,31 @@ export default function DisputeIntelligenceWorkspace({
                   </div>
                   <div>
                     <span className="text-slate-400">Gas Used / Logs: </span>
-                    {analysis.onChainVerification.txData.receipt.gasUsed} gas â€¢{" "}
+                    {analysis.onChainVerification.txData.receipt.gasUsed} gas •{" "}
                     {analysis.onChainVerification.txData.receipt.logsCount} event logs
                   </div>
                   {analysis.onChainVerification.txData.recipientProfile && (
                     <div className="mt-2 rounded-lg border border-white/10 bg-slate-950/60 p-2.5 text-[11px]">
-                      <span className="text-slate-400">PhÃ¢n loáº¡i Ä‘Ã­ch (Address Profiling): </span>
+                      <span className="text-slate-400">Phân loại đích (Address Profiling): </span>
                       <span className="font-semibold text-cyan-300">
                         {analysis.onChainVerification.txData.recipientProfile.isContract
-                          ? "Smart Contract (Há»£p Ä‘á»“ng thÃ´ng minh)"
-                          : "EOA (VÃ­ ngÆ°á»i dÃ¹ng thÃ´ng thÆ°á»ng)"}
+                          ? "Smart Contract (Hợp đồng thông minh)"
+                          : "EOA (Ví người dùng thông thường)"}
                       </span>
                       <span className="text-slate-400">
-                        {" "}â€¢ Sá»‘ dÆ° hiá»‡n táº¡i: {Number(analysis.onChainVerification.txData.recipientProfile.balanceAvax).toFixed(4)} AVAX
+                        {" "}• Số dư hiện tại: {Number(analysis.onChainVerification.txData.recipientProfile.balanceAvax).toFixed(4)} AVAX
                       </span>
                     </div>
                   )}
 
                   {analysis.onChainVerification.txData.receipt.logs.some((l) => l.decodedEvent) && (
                     <div className="mt-2 rounded-lg border border-cyan-500/20 bg-cyan-950/20 p-2.5 text-[11px]">
-                      <div className="font-semibold text-cyan-300">Sá»± kiá»‡n ERC-20 Ä‘Ã£ giáº£i mÃ£:</div>
+                      <div className="font-semibold text-cyan-300">Sự kiện ERC-20 đã giải mã:</div>
                       {analysis.onChainVerification.txData.receipt.logs
                         .filter((l) => l.decodedEvent)
                         .map((l, idx) => (
                           <div key={idx} className="mt-1 break-all text-slate-300">
-                            â€¢ {l.decodedEvent?.name}: {JSON.stringify(l.decodedEvent?.args)}
+                            • {l.decodedEvent?.name}: {JSON.stringify(l.decodedEvent?.args)}
                           </div>
                         ))}
                     </div>
@@ -562,13 +562,13 @@ export default function DisputeIntelligenceWorkspace({
               ) : (
                 <p className="mt-3 text-xs text-rose-300">
                   {analysis.onChainVerification.verificationError ||
-                    "KhÃ´ng cÃ³ dá»¯ liá»‡u giao dá»‹ch trÃªn máº¡ng Ä‘Ã£ chá»n."}
+                    "Không có dữ liệu giao dịch trên mạng đã chọn."}
                 </p>
               )}
 
               <div className="mt-4 border-t border-white/10 pt-3">
                 <div className="text-xs font-semibold text-emerald-300">
-                  Sá»± kiá»‡n xÃ¡c minh trá»±c tiáº¿p (AskPay Verified Facts):
+                  Sự kiện xác minh trực tiếp (AskPay Verified Facts):
                 </div>
                 <ul className="mt-1.5 list-disc space-y-1 [overflow-wrap:anywhere] pl-4 text-xs text-slate-200">
                   {analysis.aiInvestigation.askPay.verifiedBlockchainFacts.map(
@@ -583,27 +583,27 @@ export default function DisputeIntelligenceWorkspace({
             <div className="min-w-0 overflow-hidden rounded-2xl border border-cyan-500/30 bg-slate-900/70 p-5">
               <div className="flex flex-col items-start gap-1.5">
                 <h3 className="text-sm font-bold text-cyan-300">
-                  AskPay â€“ PhÃ¢n tÃ­ch Giao dá»‹ch On-Chain
+                  AskPay – Phân tích Giao dịch On-Chain
                 </h3>
                 <span className="inline-block whitespace-nowrap rounded-md bg-cyan-500/15 px-2.5 py-0.5 font-mono text-[10px] font-semibold text-cyan-300 ring-1 ring-cyan-500/30">
-                  PHÃ‚N TÃCH AI ({analysis.aiInvestigation.modelUsed})
+                  PHÂN TÍCH AI ({analysis.aiInvestigation.modelUsed})
                 </span>
               </div>
               <div className="mt-3 space-y-2.5 break-words text-xs leading-relaxed text-slate-200">
                 <p>
-                  <strong className="text-white">TÃ³m táº¯t tráº¡ng thÃ¡i: </strong>
+                  <strong className="text-white">Tóm tắt trạng thái: </strong>
                   {analysis.aiInvestigation.askPay.txStatusSummary}
                 </p>
                 <p>
-                  <strong className="text-white">VÃ­ gá»­i (Sender): </strong>
+                  <strong className="text-white">Ví gửi (Sender): </strong>
                   {analysis.aiInvestigation.askPay.senderExplanation}
                 </p>
                 <p>
-                  <strong className="text-white">VÃ­ nháº­n / Contract: </strong>
+                  <strong className="text-white">Ví nhận / Contract: </strong>
                   {analysis.aiInvestigation.askPay.recipientExplanation}
                 </p>
                 <p>
-                  <strong className="text-white">GiÃ¡ trá»‹ & PhÃ­ Gas: </strong>
+                  <strong className="text-white">Giá trị & Phí Gas: </strong>
                   {analysis.aiInvestigation.askPay.valueAndGasExplanation}
                 </p>
                 <p>
@@ -616,7 +616,7 @@ export default function DisputeIntelligenceWorkspace({
                 .length > 0 && (
                 <div className="mt-4 border-t border-white/10 pt-3">
                   <div className="text-xs font-semibold text-amber-300">
-                    ThÃ´ng tin chÆ°a Ä‘á»§ cÆ¡ sá»Ÿ xÃ¡c minh on-chain:
+                    Thông tin chưa đủ cơ sở xác minh on-chain:
                   </div>
                   <ul className="mt-1 list-disc space-y-1 break-words pl-4 text-xs text-slate-300">
                     {analysis.aiInvestigation.askPay.unverifiedOrInsufficientData.map(
@@ -634,10 +634,10 @@ export default function DisputeIntelligenceWorkspace({
           <div className="rounded-2xl border border-white/10 bg-slate-900/80 p-5">
             <div className="flex flex-wrap items-center justify-between gap-2">
               <h3 className="text-sm font-bold text-cyan-300">
-                DoubtStamp â€“ Äá»‘i chiáº¿u Lá»i khai & PhÃ¡t hiá»‡n MÃ¢u thuáº«n
+                DoubtStamp – Đối chiếu Lời khai & Phát hiện Mâu thuẫn
               </h3>
               <span className="text-xs text-slate-400">
-                PhÃ¢n loáº¡i: VERIFIED â€¢ CONTRADICTED â€¢ INSUFFICIENT â€¢ UNVERIFIABLE
+                Phân loại: VERIFIED • CONTRADICTED • INSUFFICIENT • UNVERIFIABLE
               </span>
             </div>
 
@@ -649,7 +649,7 @@ export default function DisputeIntelligenceWorkspace({
             {analysis.userInput.evidenceFiles.length > 0 && (
               <div className="mt-4 rounded-xl border border-white/10 bg-slate-950/60 p-3">
                 <div className="text-xs font-semibold text-slate-200">
-                  Cam káº¿t toÃ n váº¹n tá»‡p báº±ng chá»©ng (SHA-256 Commitment):
+                  Cam kết toàn vẹn tệp bằng chứng (SHA-256 Commitment):
                 </div>
                 <div className="mt-2 space-y-2">
                   {analysis.userInput.evidenceFiles.map((f, i) => (
@@ -664,7 +664,7 @@ export default function DisputeIntelligenceWorkspace({
                         SHA-256: {f.sha256CommitmentHash}
                       </div>
                       <div className="mt-1 text-[11px] italic text-amber-300/90">
-                        LÆ°u Ã½: {f.integrityNote}
+                        Lưu ý: {f.integrityNote}
                       </div>
                     </div>
                   ))}
@@ -677,11 +677,11 @@ export default function DisputeIntelligenceWorkspace({
               <table className="w-full border-collapse text-left text-xs">
                 <thead>
                   <tr className="border-b border-white/10 text-slate-400">
-                    <th className="py-2 pr-3">KhÃ­a cáº¡nh Ä‘á»‘i chiáº¿u</th>
-                    <th className="py-2 pr-3">Lá»i khai ngÆ°á»i dÃ¹ng</th>
-                    <th className="py-2 pr-3">Dá»¯ liá»‡u On-Chain / Báº±ng chá»©ng</th>
-                    <th className="py-2 pr-3">Káº¿t luáº­n</th>
-                    <th className="py-2 pr-3">LÃ½ do & Nguá»“n dá»¯ liá»‡u</th>
+                    <th className="py-2 pr-3">Khía cạnh đối chiếu</th>
+                    <th className="py-2 pr-3">Lời khai người dùng</th>
+                    <th className="py-2 pr-3">Dữ liệu On-Chain / Bằng chứng</th>
+                    <th className="py-2 pr-3">Kết luận</th>
+                    <th className="py-2 pr-3">Lý do & Nguồn dữ liệu</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-white/5">
@@ -708,7 +708,7 @@ export default function DisputeIntelligenceWorkspace({
                       <td className="py-3 pr-3 [overflow-wrap:anywhere] text-slate-300">
                         <div>{item.reasoning}</div>
                         <span className="mt-1 inline-block font-mono text-[10px] text-cyan-400">
-                          Nguá»“n: {item.dataSource}
+                          Nguồn: {item.dataSource}
                         </span>
                       </td>
                     </tr>
@@ -721,7 +721,7 @@ export default function DisputeIntelligenceWorkspace({
             <div className="mt-5 grid grid-cols-1 gap-4 md:grid-cols-2">
               <div className="min-w-0 overflow-hidden rounded-xl border border-rose-500/30 bg-rose-950/20 p-4">
                 <h4 className="text-xs font-bold text-rose-300">
-                  Äiá»ƒm mÃ¢u thuáº«n phÃ¡t hiá»‡n
+                  Điểm mâu thuẫn phát hiện
                 </h4>
                 {analysis.aiInvestigation.doubtStamp.contradictions.length > 0 ? (
                   <ul className="mt-2 list-disc space-y-1 pl-4 text-xs text-rose-200">
@@ -733,14 +733,14 @@ export default function DisputeIntelligenceWorkspace({
                   </ul>
                 ) : (
                   <p className="mt-2 text-xs text-slate-400">
-                    KhÃ´ng phÃ¡t hiá»‡n mÃ¢u thuáº«n trá»±c tiáº¿p vá»›i dá»¯ liá»‡u on-chain.
+                    Không phát hiện mâu thuẫn trực tiếp với dữ liệu on-chain.
                   </p>
                 )}
               </div>
 
               <div className="min-w-0 overflow-hidden rounded-xl border border-amber-500/30 bg-amber-950/20 p-4">
                 <h4 className="text-xs font-bold text-amber-300">
-                  Báº±ng chá»©ng cÃ²n thiáº¿u
+                  Bằng chứng còn thiếu
                 </h4>
                 <ul className="mt-2 list-disc space-y-1 pl-4 text-xs text-amber-100">
                   {analysis.aiInvestigation.doubtStamp.missingEvidence.map(
@@ -756,7 +756,7 @@ export default function DisputeIntelligenceWorkspace({
           {/* 3. LEGALMIND: Recovery Recommendations */}
           <div className="rounded-2xl border border-cyan-500/30 bg-slate-900/80 p-5">
             <h3 className="text-sm font-bold text-cyan-300">
-              LEGALMIND â€“ Äá» xuáº¥t HÆ°á»›ng xá»­ lÃ½ & Danh sÃ¡ch kiá»ƒm tra
+              LEGALMIND – Đề xuất Hướng xử lý & Danh sách kiểm tra
             </h3>
             <p className="mt-2 [overflow-wrap:anywhere] text-xs text-slate-300">
               {analysis.aiInvestigation.legalMind.executiveSummary}
@@ -770,10 +770,10 @@ export default function DisputeIntelligenceWorkspace({
                 >
                   <div className="flex flex-col items-start gap-1.5">
                     <span className="inline-block whitespace-nowrap rounded-md bg-cyan-500/15 px-2 py-0.5 font-mono text-[10px] font-semibold text-cyan-300 ring-1 ring-cyan-500/25">
-                      {step.category} â€¢ {step.priority}
+                      {step.category} • {step.priority}
                     </span>
                     <span className="font-bold text-white">
-                      BÆ°á»›c {step.step}: {step.title}
+                      Bước {step.step}: {step.title}
                     </span>
                   </div>
                   <p className="mt-1.5 [overflow-wrap:anywhere] text-slate-300">{step.description}</p>
@@ -784,7 +784,7 @@ export default function DisputeIntelligenceWorkspace({
             <div className="mt-4 grid grid-cols-1 gap-4 md:grid-cols-2">
               <div className="min-w-0 overflow-hidden rounded-xl border border-white/10 bg-slate-950/50 p-3.5 text-xs">
                 <div className="font-semibold text-white">
-                  PhÃ¢n biá»‡t HÆ°á»›ng dáº«n Ká»¹ thuáº­t & ThÃ´ng tin PhÃ¡p lÃ½:
+                  Phân biệt Hướng dẫn Kỹ thuật & Thông tin Pháp lý:
                 </div>
                 <p className="mt-1 text-slate-300">
                   {analysis.aiInvestigation.legalMind.technicalVsLegalDistinction}
@@ -792,7 +792,7 @@ export default function DisputeIntelligenceWorkspace({
               </div>
               <div className="min-w-0 overflow-hidden rounded-xl border border-white/10 bg-slate-950/50 p-3.5 text-xs">
                 <div className="font-semibold text-white">
-                  Tham chiáº¿u quy Ä‘á»‹nh & Pháº¡m vi Ã¡p dá»¥ng:
+                  Tham chiếu quy định & Phạm vi áp dụng:
                 </div>
                 <ul className="mt-1 list-disc space-y-1 pl-4 text-slate-300">
                   {analysis.aiInvestigation.legalMind.legalReferencesAndScope.map(
@@ -805,7 +805,7 @@ export default function DisputeIntelligenceWorkspace({
             </div>
 
             <div className="mt-4 rounded-xl border border-amber-500/20 bg-amber-950/15 p-3 text-[11px] text-amber-200/90">
-              <strong>TuyÃªn bá»‘ giá»›i háº¡n trÃ¡ch nhiá»‡m báº¯t buá»™c:</strong>
+              <strong>Tuyên bố giới hạn trách nhiệm bắt buộc:</strong>
               <ul className="mt-1 list-disc space-y-0.5 pl-4">
                 {analysis.aiInvestigation.legalMind.mandatoryDisclaimers.map(
                   (d, i) => (
@@ -822,10 +822,10 @@ export default function DisputeIntelligenceWorkspace({
                 <div className="rounded-2xl border border-white/10 bg-slate-900/70 p-5">
                   <div className="flex flex-wrap items-center justify-between gap-2">
                     <h4 className="text-xs font-bold uppercase tracking-wider text-cyan-300">
-                      Kiá»ƒm tra chÃ©o 3 Engine (Cross-Engine Check)
+                      Kiểm tra chéo 3 Engine (Cross-Engine Check)
                     </h4>
                     <span className={`whitespace-nowrap rounded-full px-2.5 py-0.5 text-[11px] font-semibold ${analysis.crossEngineCheck.consistent ? "bg-emerald-500/20 text-emerald-300" : "bg-rose-500/20 text-rose-300"}`}>
-                      {analysis.crossEngineCheck.consistent ? "Äá»’NG NHáº¤T" : "PHÃT HIá»†N MÃ‚U THUáºªN"}
+                      {analysis.crossEngineCheck.consistent ? "ĐỒNG NHẤT" : "PHÁT HIỆN MÂU THUẪN"}
                     </span>
                   </div>
                   <p className="mt-2.5 text-xs leading-relaxed text-slate-200">
@@ -833,7 +833,7 @@ export default function DisputeIntelligenceWorkspace({
                   </p>
                   {analysis.crossEngineCheck.requiresHumanReview && (
                     <div className="mt-2.5 rounded-lg border border-amber-500/30 bg-amber-950/30 px-3 py-1.5 text-[11px] text-amber-200">
-                      YÃªu cáº§u Human Reviewer kiá»ƒm duyá»‡t trÆ°á»›c khi neo káº¿t quáº£.
+                      Yêu cầu Human Reviewer kiểm duyệt trước khi neo kết quả.
                     </div>
                   )}
                   {analysis.crossEngineCheck.conflictsDetected.length > 0 && (
@@ -850,15 +850,15 @@ export default function DisputeIntelligenceWorkspace({
                 <div className="rounded-2xl border border-white/10 bg-slate-900/70 p-5">
                   <div className="flex flex-wrap items-center justify-between gap-2">
                     <h4 className="text-xs font-bold uppercase tracking-wider text-cyan-300">
-                      PhÃ¢n rÃ£ Äiá»ƒm Sáºµn sÃ ng (Recovery Readiness)
+                      Phân rã Điểm Sẵn sàng (Recovery Readiness)
                     </h4>
                     <span className="whitespace-nowrap rounded-full bg-cyan-500/20 px-2.5 py-0.5 text-[11px] font-bold text-cyan-200">
-                      {analysis.recoveryReadiness.score}/100 â€¢ {analysis.recoveryReadiness.level}
+                      {analysis.recoveryReadiness.score}/100 • {analysis.recoveryReadiness.level}
                     </span>
                   </div>
                   {analysis.recoveryReadiness.capApplied && (
                     <div className="mt-2 rounded-lg border border-rose-500/30 bg-rose-950/30 px-3 py-1.5 text-[11px] text-rose-200">
-                      Giá»›i háº¡n tráº§n Ä‘iá»ƒm: {analysis.recoveryReadiness.capApplied}
+                      Giới hạn trần điểm: {analysis.recoveryReadiness.capApplied}
                     </div>
                   )}
                   <div className="mt-3 space-y-2">
@@ -885,7 +885,7 @@ export default function DisputeIntelligenceWorkspace({
           <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
             <div className="rounded-2xl border border-white/10 bg-slate-900/70 p-4 lg:col-span-2">
               <h4 className="text-xs font-bold uppercase tracking-wider text-slate-300">
-                Nháº­t kÃ½ kiá»ƒm toÃ¡n há»“ sÆ¡ (Audit History)
+                Nhật ký kiểm toán hồ sơ (Audit History)
               </h4>
               <div className="mt-3 space-y-2.5">
                 {analysis.auditHistory.map((log, i) => (
@@ -895,9 +895,9 @@ export default function DisputeIntelligenceWorkspace({
                   >
                     <div className="flex flex-wrap items-center gap-2 font-mono text-[11px] text-cyan-300">
                       <span>{log.timestamp}</span>
-                      <span>â€¢</span>
+                      <span>•</span>
                       <span>{log.actor}</span>
-                      <span>â€¢</span>
+                      <span>•</span>
                       <span className="font-bold">{log.action}</span>
                     </div>
                     <p className="break-words text-slate-300">{log.detail}</p>
@@ -909,10 +909,10 @@ export default function DisputeIntelligenceWorkspace({
             <div className="flex flex-col justify-between rounded-2xl border border-white/10 bg-slate-900/70 p-4">
               <div>
                 <h4 className="text-xs font-bold uppercase tracking-wider text-slate-300">
-                  Kiá»ƒm duyá»‡t viÃªn xÃ¡c nháº­n
+                  Kiểm duyệt viên xác nhận
                 </h4>
                 <p className="mt-2 text-xs text-slate-400">
-                  Theo nguyÃªn táº¯c cá»‘t lÃµi cá»§a TRUSTRECOVER, AI khÃ´ng tá»± Ä‘Æ°a ra phÃ¡n quyáº¿t cuá»‘i cÃ¹ng. Kiá»ƒm duyá»‡t viÃªn con ngÆ°á»i xÃ¡c nháº­n káº¿t quáº£ sau khi Ä‘á»‘i chiáº¿u báº±ng chá»©ng:
+                  Theo nguyên tắc cốt lõi của TRUSTRECOVER, AI không tự đưa ra phán quyết cuối cùng. Kiểm duyệt viên con người xác nhận kết quả sau khi đối chiếu bằng chứng:
                 </p>
               </div>
               <div className="mt-4 flex flex-col gap-2">
@@ -921,7 +921,7 @@ export default function DisputeIntelligenceWorkspace({
                   onClick={() => handleHumanReviewAction("APPROVED_BY_REVIEWER")}
                   className="w-full rounded-xl bg-emerald-500/20 px-3 py-2.5 text-xs font-semibold text-emerald-300 ring-1 ring-emerald-500/40 hover:bg-emerald-500/30"
                 >
-                  âœ“ PhÃª duyá»‡t bÃ¡o cÃ¡o Ä‘iá»u tra (Human Approved)
+                  ✓ Phê duyệt báo cáo điều tra (Human Approved)
                 </button>
                 <button
                   type="button"
@@ -930,14 +930,14 @@ export default function DisputeIntelligenceWorkspace({
                   }
                   className="w-full rounded-xl bg-amber-500/20 px-3 py-2.5 text-xs font-semibold text-amber-300 ring-1 ring-amber-500/40 hover:bg-amber-500/30"
                 >
-                  âš‘ ÄÃ¡nh dáº¥u cáº§n Ä‘iá»u tra chuyÃªn sÃ¢u (Escalate)
+                  ⚑ Đánh dấu cần điều tra chuyên sâu (Escalate)
                 </button>
                 <button
                   type="button"
                   onClick={exportReportJson}
                   className="w-full rounded-xl border border-white/15 bg-white/5 px-3 py-2 text-xs font-medium text-slate-200 hover:bg-white/10"
                 >
-                  â¤“ Xuáº¥t BÃ¡o cÃ¡o Kiá»ƒm toÃ¡n (.json)
+                  ⤓ Xuất Báo cáo Kiểm toán (.json)
                 </button>
                 <AnchorCaseOnChainButton
                   analysis={analysis}
@@ -953,7 +953,7 @@ export default function DisputeIntelligenceWorkspace({
                                 timestamp: new Date().toISOString(),
                                 actor: "HUMAN_REVIEWER",
                                 action: "ANCHORED_ON_AVALANCHE_FUJI",
-                                detail: `Reviewer ${reviewerAddress} Ä‘Ã£ neo há»“ sÆ¡ lÃªn Avalanche Fuji Testnet (Tx: ${anchorTxHash}).`,
+                                detail: `Reviewer ${reviewerAddress} đã neo hồ sơ lên Avalanche Fuji Testnet (Tx: ${anchorTxHash}).`,
                               },
                             ],
                           }
