@@ -66,9 +66,25 @@ export default function DisputeIntelligenceWorkspace({
     }
     if (copilotPrefill.network) setNetwork(copilotPrefill.network);
     if (copilotPrefill.txHash) setTxHash(copilotPrefill.txHash);
-    if (copilotPrefill.claimedAmountAvax) setClaimedAmountAvax(copilotPrefill.claimedAmountAvax);
-    if (copilotPrefill.claimedAsset) setClaimedAsset(copilotPrefill.claimedAsset);
-    if (copilotPrefill.claimedRecipient) setClaimedRecipient(copilotPrefill.claimedRecipient);
+    const claimText = copilotPrefill.userClaim || "";
+    const amtMatch = claimText.match(/([0-9][0-9.,]*)\s*(USDT\.e|WETH\.e|WBTC\.e|USDC|AVAX|USD)\b/i);
+    const recMatch = claimText.match(/(?:về\s+địa\s+chỉ\s+ví|địa\s+chỉ\s+nhận[^0x]*|tới\s+ví|recipient[^0x]*)(0x[a-fA-F0-9]{40})/i);
+
+    const rawAmt = copilotPrefill.claimedAmountAvax || (amtMatch ? amtMatch[1].replace(/,/g, "") : "");
+    if (rawAmt) setClaimedAmountAvax(rawAmt.replace(/,/g, "").replace(/[^0-9.]/g, ""));
+
+    const rawAsset = copilotPrefill.claimedAsset || (amtMatch ? amtMatch[2] : "");
+    if (rawAsset) {
+      const upper = rawAsset.toUpperCase();
+      const normalized =
+        upper === "USDT.E" ? "USDT.e" :
+        upper === "WETH.E" ? "WETH.e" :
+        upper === "WBTC.E" ? "WBTC.e" : upper;
+      setClaimedAsset(normalized);
+    }
+
+    const rawRec = copilotPrefill.claimedRecipient || (recMatch ? recMatch[1] : "");
+    if (rawRec) setClaimedRecipient(rawRec);
     if (copilotPrefill.userClaim) {
       const senderNote =
         copilotPrefill.claimedSender && !copilotPrefill.userClaim.includes(copilotPrefill.claimedSender)
@@ -235,7 +251,7 @@ export default function DisputeIntelligenceWorkspace({
             Không gian Phân tích Bằng chứng & Hỗ trợ Xử lý Tranh chấp
           </h2>
           <p className="mt-1 text-xs text-slate-400">
-            AI điều tra • Xác minh dữ liệu trên Avalanche Fuji (43113) • Con người xác nhận kết quả
+            AI điều tra • Xác minh dữ liệu đa mạng Avalanche (43114 • 43113 • 779672) • Con người xác nhận kết quả
           </p>
         </div>
 
@@ -295,7 +311,7 @@ export default function DisputeIntelligenceWorkspace({
           <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
             <div>
               <label className="block text-xs font-medium text-slate-300">
-                Số tiền khiếu nại (AVAX)
+                Số lượng tài sản khiếu nại
               </label>
               <div className="flex gap-2">
                   <input
