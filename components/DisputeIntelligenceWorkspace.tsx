@@ -33,7 +33,6 @@ export interface WorkspacePrefill {
   claimedAsset?: string;
   claimedRecipient?: string;
   claimedSender?: string;
-  evidenceFile?: File;
   loadDemo?: boolean;
 }
 
@@ -92,12 +91,6 @@ export default function DisputeIntelligenceWorkspace({
           ? ` (Người gửi/Hợp đồng: ${copilotPrefill.claimedSender})`
           : "";
       setUserClaim(copilotPrefill.userClaim + senderNote);
-    }
-    if (copilotPrefill.evidenceFile) {
-      const f = copilotPrefill.evidenceFile;
-      setSelectedFiles((prev) =>
-        prev.some((x) => x.name === f.name && x.size === f.size) ? prev : [...prev, f]
-      );
     }
     setErrorMsg(null);
   }, [copilotPrefill]);
