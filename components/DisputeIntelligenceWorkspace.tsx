@@ -84,7 +84,7 @@ export default function DisputeIntelligenceWorkspace({
     }
 
     const allAddrs = (claimText.match(/0x[a-fA-F0-9]{40}/g) || []).filter((a) => a.toLowerCase() !== (copilotPrefill.claimedSender || "").toLowerCase());
-    const rawRec = copilotPrefill.claimedRecipient || (recMatch ? recMatch[1] : "") || (allAddrs.length > 0 ? allAddrs[allAddrs.length - 1] : "");
+    const rawRec = copilotPrefill.claimedRecipient || (recMatch ? recMatch[1] : "") || (allAddrs.length > 0 ? allAddrs[0] : "");
     if (rawRec) setClaimedRecipient(rawRec);
     if (copilotPrefill.userClaim) {
       const senderNote =
