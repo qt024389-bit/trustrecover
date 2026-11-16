@@ -93,7 +93,7 @@ export async function POST(request: NextRequest) {
     }
 
     const ai = new GoogleGenAI({ apiKey });
-    const models = ["gemini-3.6-flash", "gemini-3.5-flash-lite", "gemini-3.1-flash-lite"];
+    const models = ["gemini-3.6-flash-lite", "gemini-3.5-flash-lite", "gemini-3.5-flash", "gemini-3.6-flash"];
 
     const systemInstruction = `
 Bạn là Trợ lý Điều hướng Thông minh (AI Copilot) của website TRUSTRECOVER trên mạng Avalanche (C-Chain Mainnet 43114, Fuji Testnet 43113, Dispatch L1 779672).
