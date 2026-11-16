@@ -296,7 +296,7 @@ Nhiệm vụ của bạn là phân tích các tranh chấp và sự cố DeFi c�
           responseMimeType: "application/json",
           responseSchema: AI_RESPONSE_SCHEMA,
           temperature: 0.1,
-          maxOutputTokens: 3072,
+          maxOutputTokens: 8192,
         },
       });
       const controller = new AbortController();
