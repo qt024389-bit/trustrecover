@@ -68,7 +68,7 @@ const AI_RESPONSE_SCHEMA: Schema = {
               dataSource: {
                 type: Type.STRING,
                 enum: [
-                  "AVALANCHE_FUJI_ONCHAIN",
+                  "AVALANCHE_ONCHAIN_RPC",
                   "USER_EVIDENCE_FILE",
                   "CROSS_CHECK",
                 ],
@@ -301,10 +301,10 @@ Bạn vận hành 3 module nối tiếp trên cùng một hồ sơ tranh chấp:
         },
       });
       const controller = new AbortController();
-      const timer = setTimeout(() => controller.abort(), 25000);
+      const timer = setTimeout(() => controller.abort(), 40000);
       const timeoutPromise = new Promise<never>((_, reject) => {
         controller.signal.addEventListener("abort", () =>
-          reject(new Error(`Timeout sau 25s voi model ${candidate}`))
+          reject(new Error(`Timeout sau 40s voi model ${candidate}`))
         );
       });
       try {

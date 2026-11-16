@@ -33,7 +33,7 @@ export interface DoubtStampFinding {
   onChainOrEvidenceReference: string;
   verdict: EvidenceVerdict;
   reasoning: string;
-  dataSource: "AVALANCHE_FUJI_ONCHAIN" | "USER_EVIDENCE_FILE" | "CROSS_CHECK";
+  dataSource: "AVALANCHE_ONCHAIN_RPC" | "USER_EVIDENCE_FILE" | "CROSS_CHECK";
 }
 
 export interface DoubtStampReport {
