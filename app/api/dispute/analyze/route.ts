@@ -74,7 +74,7 @@ export async function POST(request: NextRequest) {
           success: false,
           error: {
             code: "MISSING_TX_HASH",
-            message: "Vui lòng nhập Transaction Hash trên Avalanche Fuji Testnet.",
+            message: "Vui lòng nhập Transaction Hash trên Avalanche.",
           },
         },
         { status: 400 }
