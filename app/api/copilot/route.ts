@@ -27,6 +27,8 @@ const COPILOT_SCHEMA: Schema = {
   required: ["reply", "targetTab"],
 };
 
+export const maxDuration = 60;
+
 export async function POST(request: NextRequest) {
   const clientIp = request.headers.get("x-forwarded-for") || "local";
   const rl = checkRateLimit("copilot:" + clientIp, 20, 60_000);
@@ -146,9 +148,10 @@ Nếu có tệp hoặc hình ảnh đính kèm:
               responseMimeType: "application/json",
               responseSchema: COPILOT_SCHEMA,
               temperature: 0.45,
+              maxOutputTokens: 1024,
             },
           }),
-          new Promise<never>((_, rej) => setTimeout(() => rej(new Error("TIMEOUT_25S")), 25000)),
+          new Promise<never>((_, rej) => setTimeout(() => rej(new Error("TIMEOUT_18S")), 18000)),
         ]);
         responseText = res.text;
         if (responseText) break;
