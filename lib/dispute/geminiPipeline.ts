@@ -268,7 +268,7 @@ Nhiệm vụ của bạn là phân tích các tranh chấp và sự cố DeFi c�
   };
 
   const candidateModels = Array.from(
-    new Set(["gemini-3.5-flash-lite", "gemini-3.5-flash", "gemini-3.6-flash"])
+    new Set(["gemini-3.6-flash", "gemini-3.5-flash-lite", "gemini-3.5-flash"])
   );
 
   let response: Awaited<ReturnType<typeof ai.models.generateContent>> | null = null;
@@ -286,11 +286,7 @@ Nhiệm vụ của bạn là phân tích các tranh chấp và sự cố DeFi c�
             role: "user",
             parts: [
               {
-                text: `Hãy phân tích hồ sơ tranh chấp DeFi sau đây và trả về JSON theo đúng schema:\n${JSON.stringify(
-                  promptPayload,
-                  null,
-                  2
-                )}`,
+                text: `Hãy phân tích hồ sơ tranh chấp DeFi sau đây và trả về JSON theo đúng schema:\n${JSON.stringify(promptPayload)}`,
               },
             ],
           },
@@ -300,13 +296,14 @@ Nhiệm vụ của bạn là phân tích các tranh chấp và sự cố DeFi c�
           responseMimeType: "application/json",
           responseSchema: AI_RESPONSE_SCHEMA,
           temperature: 0.1,
+          maxOutputTokens: 3072,
         },
       });
       const controller = new AbortController();
-      const timer = setTimeout(() => controller.abort(), 22000);
+      const timer = setTimeout(() => controller.abort(), 18000);
       const timeoutPromise = new Promise<never>((_, reject) => {
         controller.signal.addEventListener("abort", () =>
-          reject(new Error(`Timeout sau 22s voi model ${candidate}`))
+          reject(new Error(`Timeout sau 18s voi model ${candidate}`))
         );
       });
       try {
@@ -337,7 +334,8 @@ Nhiệm vụ của bạn là phân tích các tranh chấp và sự cố DeFi c�
     throw new Error("Gemini API không trả về nội dung phân tích.");
   }
 
-  const parsed = JSON.parse(rawText);
+  const cleanRaw = rawText.replace(/^```json\s*/i, "").replace(/```$/i, "").trim();
+  const parsed = JSON.parse(cleanRaw);
   const cleanEvidence = params.evidenceFiles.map(({ inlineDataBase64, ...rest }) => rest);
 
   const { crossEngineCheck, recoveryReadiness } = evaluateCrossEngineAndReadiness({

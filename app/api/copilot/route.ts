@@ -95,7 +95,7 @@ export async function POST(request: NextRequest) {
     }
 
     const ai = new GoogleGenAI({ apiKey });
-    const models = ["gemini-3.5-flash-lite", "gemini-3.5-flash", "gemini-3.6-flash"];
+    const models = ["gemini-3.6-flash", "gemini-3.5-flash-lite", "gemini-3.5-flash"];
 
     const systemInstruction = `
 Bạn là Trợ lý Điều hướng Thông minh (AI Copilot) của website TRUSTRECOVER trên mạng Avalanche (C-Chain Mainnet 43114, Fuji Testnet 43113, Dispatch L1 779672).
@@ -151,14 +151,14 @@ Nếu có tệp hoặc hình ảnh đính kèm:
               maxOutputTokens: 2048,
             },
           }),
-          new Promise<never>((_, rej) => setTimeout(() => rej(new Error("TIMEOUT_12S")), 12000)),
+          new Promise<never>((_, rej) => setTimeout(() => rej(new Error("TIMEOUT_14S")), 14000)),
         ]);
         responseText = res.text;
         if (responseText) break;
       } catch (err) {
         lastErrMsg = err instanceof Error ? err.message : String(err);
-        if (lastErrMsg.includes("503") || lastErrMsg.includes("UNAVAILABLE") || lastErrMsg.includes("high demand")) {
-          await new Promise((r) => setTimeout(r, 800));
+        if (!lastErrMsg.includes("429") && !lastErrMsg.includes("404") && (lastErrMsg.includes("503") || lastErrMsg.includes("UNAVAILABLE"))) {
+          await new Promise((r) => setTimeout(r, 500));
         }
         continue;
       }
@@ -168,7 +168,8 @@ Nếu có tệp hoặc hình ảnh đính kèm:
       throw new Error(`Trợ lý AI đang bận tạm thời (${lastErrMsg.slice(0, 140) || "no_response"}).`);
     }
 
-    const parsed = JSON.parse(responseText);
+    const cleanJson = responseText.replace(/^```json\s*/i, "").replace(/```$/i, "").trim();
+    const parsed = JSON.parse(cleanJson);
     return NextResponse.json({ success: true, data: parsed }, { status: 200 });
   } catch (err: unknown) {
     return NextResponse.json(

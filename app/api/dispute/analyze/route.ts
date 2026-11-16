@@ -4,6 +4,8 @@ import { runDisputeIntelligencePipeline } from "@/lib/dispute/geminiPipeline";
 import type { EvidenceFileMeta } from "@/lib/dispute/types";
 import { checkRateLimit } from "@/lib/security/rateLimit";
 
+export const maxDuration = 60;
+
 export async function POST(request: NextRequest) {
   const clientIp = request.headers.get("x-forwarded-for") || "local";
   const rl = checkRateLimit("dispute:" + clientIp);
