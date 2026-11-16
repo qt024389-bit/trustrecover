@@ -136,7 +136,7 @@ Nếu có tệp hoặc hình ảnh đính kèm:
 
     let responseText: string | undefined;
     let lastErrMsg = "";
-    const attemptModels = [...models, ...models];
+    const attemptModels = [...models];
     for (const model of attemptModels) {
       try {
         const res = await Promise.race([
@@ -148,17 +148,17 @@ Nếu có tệp hoặc hình ảnh đính kèm:
               responseMimeType: "application/json",
               responseSchema: COPILOT_SCHEMA,
               temperature: 0.45,
-              maxOutputTokens: 4096,
+              maxOutputTokens: 2048,
             },
           }),
-          new Promise<never>((_, rej) => setTimeout(() => rej(new Error("TIMEOUT_18S")), 18000)),
+          new Promise<never>((_, rej) => setTimeout(() => rej(new Error("TIMEOUT_12S")), 12000)),
         ]);
         responseText = res.text;
         if (responseText) break;
       } catch (err) {
         lastErrMsg = err instanceof Error ? err.message : String(err);
         if (lastErrMsg.includes("503") || lastErrMsg.includes("UNAVAILABLE") || lastErrMsg.includes("high demand")) {
-          await new Promise((r) => setTimeout(r, 2500));
+          await new Promise((r) => setTimeout(r, 800));
         }
         continue;
       }

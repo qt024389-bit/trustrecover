@@ -275,8 +275,7 @@ Nhiệm vụ của bạn là phân tích các tranh chấp và sự cố DeFi c�
   let usedModel = modelName;
   let lastError: unknown = null;
 
-  const retryQueue = [...candidateModels, ...candidateModels];
-  for (const candidate of retryQueue) {
+  for (const candidate of candidateModels) {
     try {
       usedModel = candidate;
       console.log(`[TRUSTRECOVER AI] Calling model: ${candidate}...`);
