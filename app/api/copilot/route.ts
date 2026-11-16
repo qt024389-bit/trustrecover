@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { GoogleGenAI, Type, Schema } from "@google/genai";
 import { checkRateLimit } from "@/lib/security/rateLimit";
+import { extractText } from "unpdf";
 
 const COPILOT_SCHEMA: Schema = {
   type: Type.OBJECT,
@@ -61,15 +62,22 @@ export async function POST(request: NextRequest) {
         attachedFileName = rawFile.name;
         const buf = Buffer.from(await rawFile.arrayBuffer());
         const mime = rawFile.type || "";
-        if (
-          mime.startsWith("image/") ||
-          mime === "application/pdf" ||
-          /\.(png|jpg|jpeg|webp|pdf)$/i.test(rawFile.name)
-        ) {
+        const isPdf = mime === "application/pdf" || /\.pdf$/i.test(rawFile.name);
+        if (isPdf) {
+          try {
+            const pdfRes = await extractText(new Uint8Array(buf), { mergePages: true });
+            const txt = (Array.isArray(pdfRes.text) ? pdfRes.text.join("\n") : String(pdfRes.text || "")).trim();
+            if (txt.length > 80) {
+              extractedFileText = txt.slice(0, 6000);
+            }
+          } catch {}
+          if (!extractedFileText) {
+            fileBase64 = buf.toString("base64");
+            fileMime = "application/pdf";
+          }
+        } else if (mime.startsWith("image/") || /\.(png|jpg|jpeg|webp)$/i.test(rawFile.name)) {
           fileBase64 = buf.toString("base64");
-          fileMime =
-            mime ||
-            (/\.pdf$/i.test(rawFile.name) ? "application/pdf" : "image/png");
+          fileMime = mime || "image/png";
         } else {
           extractedFileText = buf.toString("utf-8").slice(0, 3000);
         }
