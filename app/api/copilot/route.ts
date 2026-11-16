@@ -156,13 +156,14 @@ Nếu có tệp hoặc hình ảnh đính kèm:
               responseMimeType: "application/json",
               responseSchema: COPILOT_SCHEMA,
               temperature: 0.45,
-              maxOutputTokens: 2000,
             },
           }),
           new Promise<never>((_, rej) => setTimeout(() => rej(new Error(fileBase64 ? "TIMEOUT_FILE_26S" : "TIMEOUT_12S")), fileBase64 ? 26000 : 12000)),
         ]);
-        responseText = res.text;
-        if (responseText) break;
+        const raw = (res.text || "").replace(/^```json\s*/i, "").replace(/```$/i, "").trim();
+        JSON.parse(raw);
+        responseText = raw;
+        break;
       } catch (err) {
         lastErrMsg = err instanceof Error ? err.message : String(err);
         if (!lastErrMsg.includes("429") && !lastErrMsg.includes("404") && (lastErrMsg.includes("503") || lastErrMsg.includes("UNAVAILABLE"))) {
