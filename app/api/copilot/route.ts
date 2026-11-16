@@ -95,7 +95,7 @@ export async function POST(request: NextRequest) {
     }
 
     const ai = new GoogleGenAI({ apiKey });
-    const models = ["gemini-3.6-flash", "gemini-3.5-flash-lite", "gemini-3.5-flash"];
+    const models = ["gemini-3.6-flash", "gemini-3.5-flash", "gemini-3.5-flash-lite"];
 
     const systemInstruction = `
 Bạn là Trợ lý Điều hướng Thông minh (AI Copilot) của website TRUSTRECOVER trên mạng Avalanche (C-Chain Mainnet 43114, Fuji Testnet 43113, Dispatch L1 779672).
@@ -148,10 +148,10 @@ Nếu có tệp hoặc hình ảnh đính kèm:
               responseMimeType: "application/json",
               responseSchema: COPILOT_SCHEMA,
               temperature: 0.45,
-              maxOutputTokens: 8192,
+              maxOutputTokens: 3060,
             },
           }),
-          new Promise<never>((_, rej) => setTimeout(() => rej(new Error("TIMEOUT_14S")), 14000)),
+          new Promise<never>((_, rej) => setTimeout(() => rej(new Error(fileBase64 ? "TIMEOUT_FILE_26S" : "TIMEOUT_12S")), fileBase64 ? 26000 : 12000)),
         ]);
         responseText = res.text;
         if (responseText) break;
