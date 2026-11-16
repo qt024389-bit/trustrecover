@@ -133,6 +133,7 @@ Nếu có tệp hoặc hình ảnh đính kèm:
     }
 
     let responseText: string | undefined;
+    let lastErrMsg = "";
     for (const model of models) {
       try {
         const res = await Promise.race([
@@ -146,17 +147,18 @@ Nếu có tệp hoặc hình ảnh đính kèm:
               temperature: 0.45,
             },
           }),
-          new Promise<never>((_, rej) => setTimeout(() => rej(new Error("TIMEOUT")), 20000)),
+          new Promise<never>((_, rej) => setTimeout(() => rej(new Error("TIMEOUT_15S")), 15000)),
         ]);
         responseText = res.text;
         if (responseText) break;
-      } catch {
+      } catch (err) {
+        lastErrMsg = err instanceof Error ? err.message : String(err);
         continue;
       }
     }
 
     if (!responseText) {
-      throw new Error("Trợ lý AI đang bận tạm thời, vui lòng thử lại sau vài giây.");
+      throw new Error(`Trợ lý AI đang bận tạm thời (${lastErrMsg.slice(0, 140) || "no_response"}).`);
     }
 
     const parsed = JSON.parse(responseText);
