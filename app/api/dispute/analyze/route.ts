@@ -17,6 +17,7 @@ export async function POST(request: NextRequest) {
     let txHash = "";
     let userClaim = "";
     let claimedAmountAvax = "";
+      let claimedAsset = "";
     let claimedRecipient = "";
     let network = "fuji";
     let evidenceFiles: EvidenceFileMeta[] = [];
@@ -26,6 +27,7 @@ export async function POST(request: NextRequest) {
       txHash = String(formData.get("txHash") || "").trim();
       userClaim = String(formData.get("userClaim") || "").trim();
       claimedAmountAvax = String(formData.get("claimedAmountAvax") || "").trim();
+        claimedAsset = String(formData.get("claimedAsset") || "").trim();
       claimedRecipient = String(formData.get("claimedRecipient") || "").trim();
       network = String(formData.get("network") || "fuji").trim();
 
@@ -64,6 +66,7 @@ export async function POST(request: NextRequest) {
       txHash = String(body.txHash || "").trim();
       userClaim = String(body.userClaim || "").trim();
       claimedAmountAvax = String(body.claimedAmountAvax || "").trim();
+        claimedAsset = String(body.claimedAsset || "").trim();
       claimedRecipient = String(body.claimedRecipient || "").trim();
       network = String(body.network || "fuji").trim();
     }
@@ -99,6 +102,7 @@ export async function POST(request: NextRequest) {
       txHash,
       userClaim,
       claimedAmountAvax: claimedAmountAvax || undefined,
+        claimedAsset: claimedAsset || undefined,
       claimedRecipient: claimedRecipient || undefined,
       network,
       evidenceFiles,

@@ -10,7 +10,7 @@ import type {
 } from "./types";
 
 const OVERALL_AI_DEADLINE_MS = 48_000;
-const PER_ATTEMPT_CAP_MS = 22_000;
+const PER_ATTEMPT_CAP_MS = 32_000;
 const MIN_REMAINING_FOR_FALLBACK_MS = 4_000;
 
 const AI_RESPONSE_SCHEMA: Schema = {
@@ -191,9 +191,29 @@ export interface RunDisputePipelineParams {
   txHash: string;
   userClaim: string;
   claimedAmountAvax?: string;
+  claimedAsset?: string;
   claimedRecipient?: string;
   evidenceFiles: EvidenceFileMeta[];
   network?: string;
+}
+
+function parseClaimedAmountAndAsset(rawAmount?: string, rawAsset?: string): {
+  claimedAmount: string | null;
+  claimedAsset: string;
+} {
+  const amtStr = (rawAmount || "").trim();
+  const explicitAsset = (rawAsset || "").trim();
+  if (!amtStr) {
+    return { claimedAmount: null, claimedAsset: explicitAsset || "AVAX" };
+  }
+  const m = amtStr.match(/^([0-9][0-9.,]*)\s*([A-Za-z0-9._-]+)?$/);
+  if (m) {
+    return {
+      claimedAmount: m[1].replace(/,/g, ""),
+      claimedAsset: explicitAsset || m[2] || "AVAX",
+    };
+  }
+  return { claimedAmount: amtStr, claimedAsset: explicitAsset || "AVAX" };
 }
 
 function logPipelineStage(data: {
@@ -284,14 +304,19 @@ export async function runDisputeIntelligencePipeline(
   const systemInstruction = `
 Bạn là hệ thống AI Dispute Intelligence (AskPay • DoubtStamp • LegalMind) của TRUSTRECOVER trên mạng ${netCfg.name} (Chain ID ${netCfg.chainId}).
 Nguyên tắc TUYỆT ĐỐI TRUNG THỰC:
-1. AskPay: Chỉ dùng dữ kiện thật trong ONCHAIN_VERIFICATION_DATA. Giải mã dòng chảy token từ decodedEvents nếu valueAvax=0. Phân biệt EOA với Smart Contract. Tách rõ: (a) Dữ kiện RPC, (b) Lời khai/Tài liệu, (c) Giới hạn chưa đủ cơ sở on-chain.
+1. AskPay: Chỉ dùng dữ kiện thật trong ONCHAIN_VERIFICATION_DATA. Nếu claimedAsset khác AVAX (VD: USDT.e, WETH.e), phải đối chiếu claimedAmount với decodedEvents, tuyệt đối KHÔNG hiểu nhầm thành AVAX. Giải mã dòng chảy token từ decodedEvents nếu valueAvax=0. Phân biệt EOA với Smart Contract. Tách rõ: (a) Dữ kiện RPC, (b) Lời khai/Tài liệu, (c) Giới hạn chưa đủ cơ sở on-chain.
 2. DoubtStamp: Đối chiếu tối đa 6 khía cạnh cốt lõi (Mạng/Chain ID, Tài sản/Số lượng, Ví nhận/Contract, Tài liệu bằng chứng). Phân biệt giao dịch cấp phí gas với giao dịch rút tài sản; nếu lời khai nêu tổng thiệt hại toàn vụ nhưng TxHash chỉ là 1 giao dịch thành phần, ghi rõ PARTIAL/CONTRADICTED ở quy mô và nêu missingEvidence. Không tự bịa hash hay nâng điểm. Verdict: VERIFIED | CONTRADICTED | INSUFFICIENT | UNVERIFIABLE.
 3. LegalMind: Lập tối đa 5 bước disputeChecklist, missingEvidenceSteps, platformEscalationGuidance. Hướng dẫn tra cứu tại ${netCfg.explorerTxBase}. Đối chiếu pháp luật thực tế (VD Việt Nam: BLDS 2015 Điều 579, 584; BLHS 2015 sửa đổi 2017 Điều 289, 290; Luật An ninh mạng 2018). Không tuyên bố đảo ngược giao dịch blockchain; không thay thế Human Reviewer.
 Trả lời bằng tiếng Việt súc tích, đúng JSON schema.`.trim();
 
+  const { claimedAmount, claimedAsset } = parseClaimedAmountAndAsset(
+    params.claimedAmountAvax,
+    params.claimedAsset
+  );
   const promptPayload = {
     USER_CLAIM: params.userClaim,
-    claimedAmountAvax: params.claimedAmountAvax ?? null,
+    claimedAmount,
+    claimedAsset,
     claimedRecipient: params.claimedRecipient ?? null,
     ONCHAIN_VERIFICATION_DATA: txResult.success ? txResult.data : { verified: false, error: txResult.error },
     EVIDENCE_FILES: params.evidenceFiles.map(({ inlineDataBase64, ...meta }) => ({
@@ -324,7 +349,10 @@ Trả lời bằng tiếng Việt súc tích, đúng JSON schema.`.trim();
   let parsed: z.infer<typeof AiInvestigationZodSchema> | null = null;
   let lastError: unknown = null;
 
-  for (const candidate of candidateModels) {
+  const attemptQueue = [...candidateModels];
+  let addedSecondPass = false;
+  for (let idx = 0; idx < attemptQueue.length; idx++) {
+    const candidate = attemptQueue[idx];
     const remainingMs = deadlineAt - Date.now();
     if (remainingMs < MIN_REMAINING_FOR_FALLBACK_MS) {
       lastError = new Error("Đã hết thời gian ngân sách tổng thể (48s) cho pipeline AI.");
@@ -396,7 +424,11 @@ Trả lời bằng tiếng Việt súc tích, đúng JSON schema.`.trim();
         break;
       }
       if (code === "HTTP_503" && deadlineAt - Date.now() > MIN_REMAINING_FOR_FALLBACK_MS + 600) {
-        await new Promise((r) => setTimeout(r, 500));
+        await new Promise((r) => setTimeout(r, 800));
+      }
+      if (idx === attemptQueue.length - 1 && !addedSecondPass && deadlineAt - Date.now() >= 15_000) {
+        addedSecondPass = true;
+        attemptQueue.push(...candidateModels);
       }
     } finally {
       clearTimeout(timer);
