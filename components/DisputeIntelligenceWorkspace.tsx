@@ -68,7 +68,7 @@ export default function DisputeIntelligenceWorkspace({
     if (copilotPrefill.txHash) setTxHash(copilotPrefill.txHash);
     const claimText = copilotPrefill.userClaim || "";
     const amtMatch = claimText.match(/([0-9][0-9.,]*)\s*(USDT\.e|WETH\.e|WBTC\.e|USDC|AVAX|USD)\b/i);
-    const recMatch = claimText.match(/(?:về\s+địa\s+chỉ\s+ví|địa\s+chỉ\s+nhận[^0x]*|tới\s+ví|recipient[^0x]*)(0x[a-fA-F0-9]{40})/i);
+    const recMatch = claimText.match(/(?:về\s+(?:địa\s+chỉ\s+)?ví|về\s+địa\s+chỉ|địa\s+chỉ\s+nhận[^0x]*|tới\s+(?:địa\s+chỉ\s+)?ví|tới\s+địa\s+chỉ|đến\s+(?:địa\s+chỉ\s+)?ví|recipient[^0x]*)(0x[a-fA-F0-9]{40})/i);
 
     const rawAmt = copilotPrefill.claimedAmountAvax || (amtMatch ? amtMatch[1].replace(/,/g, "") : "");
     if (rawAmt) setClaimedAmountAvax(rawAmt.replace(/,/g, "").replace(/[^0-9.]/g, ""));
@@ -83,7 +83,10 @@ export default function DisputeIntelligenceWorkspace({
       setClaimedAsset(normalized);
     }
 
-    const rawRec = copilotPrefill.claimedRecipient || (recMatch ? recMatch[1] : "");
+    const allAddrs = (claimText.match(/0x[a-fA-F0-9]{40}/g) || []).filter(
+      (a) => a.toLowerCase() !== (copilotPrefill.claimedSender || "").toLowerCase()
+    );
+    const rawRec = copilotPrefill.claimedRecipient || (recMatch ? recMatch[1] : "") || (allAddrs.length > 0 ? allAddrs[allAddrs.length - 1] : "");
     if (rawRec) setClaimedRecipient(rawRec);
     if (copilotPrefill.userClaim) {
       const senderNote =

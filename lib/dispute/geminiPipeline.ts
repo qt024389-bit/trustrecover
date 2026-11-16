@@ -303,10 +303,10 @@ Nhiệm vụ của bạn là phân tích các tranh chấp và sự cố DeFi c�
         },
       });
       const controller = new AbortController();
-      const timer = setTimeout(() => controller.abort(), 40000);
+      const timer = setTimeout(() => controller.abort(), 22000);
       const timeoutPromise = new Promise<never>((_, reject) => {
         controller.signal.addEventListener("abort", () =>
-          reject(new Error(`Timeout sau 40s voi model ${candidate}`))
+          reject(new Error(`Timeout sau 22s voi model ${candidate}`))
         );
       });
       try {
@@ -317,8 +317,12 @@ Nhiệm vụ của bạn là phân tích các tranh chấp và sự cố DeFi c�
       console.log(`[TRUSTRECOVER AI] Success with model: ${candidate}`);
       break;
     } catch (err) {
+      const msg = err instanceof Error ? err.message : String(err);
+      if (msg.includes("503") || msg.includes("UNAVAILABLE") || msg.includes("high demand")) {
+        await new Promise((r) => setTimeout(r, 1200));
+      }
       lastError = err;
-      console.error(`[TRUSTRECOVER AI] Model ${candidate} failed:`, err instanceof Error ? err.message : err);
+      console.error(`[TRUSTRECOVER AI] Model ${candidate} failed:`, msg);
     }
   }
 
