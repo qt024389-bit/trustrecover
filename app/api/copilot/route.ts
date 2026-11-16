@@ -136,7 +136,7 @@ Nếu có tệp hoặc hình ảnh đính kèm:
 
     let responseText: string | undefined;
     let lastErrMsg = "";
-    const attemptModels = [...models];
+    const attemptModels = [...models, ...models];
     for (const model of attemptModels) {
       try {
         const res = await Promise.race([
@@ -158,7 +158,7 @@ Nếu có tệp hoặc hình ảnh đính kèm:
       } catch (err) {
         lastErrMsg = err instanceof Error ? err.message : String(err);
         if (lastErrMsg.includes("503") || lastErrMsg.includes("UNAVAILABLE") || lastErrMsg.includes("high demand")) {
-          await new Promise((r) => setTimeout(r, 1200));
+          await new Promise((r) => setTimeout(r, 2500));
         }
         continue;
       }
