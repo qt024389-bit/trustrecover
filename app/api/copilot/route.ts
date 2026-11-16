@@ -156,7 +156,7 @@ Nếu có tệp hoặc hình ảnh đính kèm:
               responseMimeType: "application/json",
               responseSchema: COPILOT_SCHEMA,
               temperature: 0.45,
-              maxOutputTokens: 3060,
+              maxOutputTokens: 2000,
             },
           }),
           new Promise<never>((_, rej) => setTimeout(() => rej(new Error(fileBase64 ? "TIMEOUT_FILE_26S" : "TIMEOUT_12S")), fileBase64 ? 26000 : 12000)),
