@@ -259,7 +259,7 @@ export default function DisputeIntelligenceWorkspace({
           </div>
           <div>
             <label className="block text-xs font-medium text-slate-300">
-              1. Mã giao dịch Avalanche Fuji (Transaction Hash - Bắt buộc)
+              1. Mã giao dịch Avalanche (Transaction Hash - Bắt buộc)
             </label>
             <input
               type="text"
@@ -379,7 +379,7 @@ export default function DisputeIntelligenceWorkspace({
 
             <div className="rounded-2xl border border-white/10 bg-slate-900/70 p-4">
               <span className="text-[11px] uppercase tracking-wider text-slate-400">
-                Xác Minh Blockchain (Avalanche Fuji 43113)
+                Xác Minh Blockchain ({analysis.onChainVerification.networkName} • {analysis.onChainVerification.chainId})
               </span>
               <div className="mt-1 text-sm font-bold">
                 {analysis.onChainVerification.verified ? (
@@ -393,7 +393,7 @@ export default function DisputeIntelligenceWorkspace({
                 )}
               </div>
               <p className="mt-1 text-[11px] text-slate-400">
-                Nguồn: {network === "dispatch" ? "Dispatch L1 RPC" : network === "mainnet" ? "Avalanche Mainnet RPC" : "Avalanche Fuji RPC"} (ethers.js) — Tách biệt hoàn toàn với suy luận AI
+                Nguồn: {analysis.onChainVerification.networkName} RPC (eth_chainId: {analysis.onChainVerification.chainId}) — Tách biệt hoàn toàn với suy luận AI
               </p>
             </div>
 
@@ -431,7 +431,7 @@ export default function DisputeIntelligenceWorkspace({
             <div className="min-w-0 overflow-hidden rounded-2xl border border-emerald-500/30 bg-emerald-950/15 p-5">
               <div className="flex flex-col items-start gap-1.5">
                 <h3 className="text-sm font-bold text-emerald-300">
-                  Dữ liệu xác thực trên Blockchain ({network === "dispatch" ? "Dispatch L1 RPC" : network === "mainnet" ? "Avalanche Mainnet RPC" : "Avalanche Fuji RPC"})
+                  Dữ liệu xác thực trên Blockchain ({analysis.onChainVerification.networkName} • {analysis.onChainVerification.chainId})
                 </h3>
                 <span className="inline-block whitespace-nowrap rounded-md bg-emerald-500/15 px-2.5 py-0.5 font-mono text-[10px] font-semibold text-emerald-300 ring-1 ring-emerald-500/30">
                   DỮ LIỆU GỐC
@@ -509,7 +509,7 @@ export default function DisputeIntelligenceWorkspace({
               ) : (
                 <p className="mt-3 text-xs text-rose-300">
                   {analysis.onChainVerification.verificationError ||
-                    "Không có dữ liệu giao dịch trên Avalanche Fuji."}
+                    "Không có dữ liệu giao dịch trên mạng đã chọn."}
                 </p>
               )}
 

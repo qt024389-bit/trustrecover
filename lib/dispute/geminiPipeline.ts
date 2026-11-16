@@ -1,5 +1,6 @@
 import { GoogleGenAI, Type, Schema } from "@google/genai";
 import { verifyFujiTransaction } from "@/lib/avalanche/verifyTransaction";
+import { resolveAvalancheNetwork } from "@/lib/avalanche/networks";
 import { evaluateCrossEngineAndReadiness } from "./consistencyAndScoring";
 import type {
   DisputeCaseAnalysis,
@@ -187,16 +188,17 @@ export async function runDisputeIntelligencePipeline(
   const auditHistory: AuditLogEntry[] = [];
   const caseId = `TR-${Date.now().toString(36).toUpperCase()}`;
 
-  // 1. Verify on-chain transaction via existing Avalanche Fuji engine
+  // 1. Verify on-chain transaction via Avalanche RPC (dynamic network + eth_chainId)
+  const netCfg = resolveAvalancheNetwork(params.network);
   const txResult = await verifyFujiTransaction(params.txHash, params.network);
   auditHistory.push({
     timestamp: new Date().toISOString(),
     actor: "SYSTEM_AVALANCHE_RPC",
     action: txResult.success
-      ? "VERIFIED_FUJI_TRANSACTION"
-      : "FAILED_FUJI_TRANSACTION_VERIFICATION",
+      ? "VERIFIED_ONCHAIN_TRANSACTION"
+      : "FAILED_ONCHAIN_TRANSACTION_VERIFICATION",
     detail: txResult.success
-      ? `Xác minh thành công giao dịch ${txResult.data.transaction.hash} tại block ${txResult.data.transaction.blockNumber} trên Avalanche Fuji (Chain ID 43113).`
+      ? `Xác minh thành công giao dịch ${txResult.data.transaction.hash} tại block ${txResult.data.transaction.blockNumber} trên ${netCfg.name} (Chain ID ${netCfg.chainId}).`
       : `Không xác minh được giao dịch (${txResult.error.code}): ${txResult.error.message}`,
   });
 
@@ -216,7 +218,7 @@ export async function runDisputeIntelligencePipeline(
   const ai = new GoogleGenAI({ apiKey });
 
   const systemInstruction = `
-Bạn là hệ thống AI Dispute Intelligence của TRUSTRECOVER trên mạng Avalanche Fuji Testnet (Chain ID 43113).
+Bạn là hệ thống AI Dispute Intelligence của TRUSTRECOVER đang xác minh trên mạng ${netCfg.name} (Chain ID ${netCfg.chainId}).
 Bạn vận hành 3 module nối tiếp trên cùng một hồ sơ tranh chấp:
 1. AskPay (Transaction Intelligence):
 - Chỉ sử dụng dữ liệu on-chain thực tế được cung cấp trong trường ONCHAIN_VERIFICATION_DATA.
@@ -225,7 +227,13 @@ Bạn vận hành 3 module nối tiếp trên cùng một hồ sơ tranh chấp:
 - Phân biệt rõ những sự kiện đã được xác minh trên blockchain (verifiedBlockchainFacts) và những thông tin ngoài chuỗi chưa đủ cơ sở (unverifiedOrInsufficientData).
 
 2. DoubtStamp (Evidence Consistency Analysis):
-- Đối chiếu từng chi tiết trong lời khai người dùng (USER_CLAIM, claimedAmountAvax, claimedRecipient) và tệp bằng chứng (EVIDENCE_FILES) với dữ liệu thực tế từ Avalanche Fuji (ONCHAIN_VERIFICATION_DATA).
+- Đối chiếu từng chi tiết trong lời khai người dùng (USER_CLAIM, claimedAmountAvax, claimedRecipient) và tệp bằng chứng (EVIDENCE_FILES) với dữ liệu thực tế từ ${netCfg.name} (Chain ID ${netCfg.chainId}) trong ONCHAIN_VERIFICATION_DATA.
+- PHÂN BIỆT 3 LỚP DỮ KIỆN (BẮT BUỘC):
+  1) Dữ kiện blockchain đã xác minh (RPC): Chỉ gồm các trường có thật trong ONCHAIN_VERIFICATION_DATA (txHash, chainId=${netCfg.chainId}, from, to, value, logs, decodedEvents).
+  2) Thông tin từ tài liệu / lời khai: Nội dung từ USER_CLAIM hoặc EVIDENCE_FILES (ví dụ báo cáo sự cố Vee Finance ~35M USD, ví tấn công công bố). Không được gán là dữ kiện on-chain nếu TxHash hiện tại chưa thể hiện.
+  3) Suy luận AI: Nhận định điều tra, giả thuyết đối chiếu — phải nêu rõ là suy luận.
+- NHẬN DIỆN GIAO DỊCH CHUẨN BỊ VS GIAO DỊCH KHAI THÁC: Nếu TxHash chỉ là giao dịch cấp phí gas/chuẩn bị (ví dụ 0.1 AVAX tới ví EOA) trong khi lời khai/báo cáo (như Vee Finance) nhắc tới thiệt hại lớn hoặc rút token (WETH.e/WBTC.e), PHẢI chỉ rõ đây mới là giao dịch chuẩn bị/liên quan ví chứ KHÔNG PHẢI giao dịch khai thác thực tế, và đề nghị cung cấp TxHash khai thác chính.
+- KHÔNG TỰ TẠO CHỨNG CỨ & KHÔNG NÂNG ĐIỂM: Không bịa đặt số liệu/log ngoài RPC, không tự nâng điểm bằng chứng khi TxHash hiện tại chưa khớp với giao dịch khai thác chính.
 - Phân loại từng điểm đối chiếu vào đúng 1 trong 4 nhãn:
   + VERIFIED: Khớp trực tiếp với dữ liệu on-chain đã xác minh.
   + CONTRADICTED: Mâu thuẫn trực tiếp với dữ liệu on-chain (ví dụ: khai chuyển 10 AVAX nhưng on-chain là 0 AVAX, hoặc khai sai địa chỉ ví nhận, sai trạng thái giao dịch).
@@ -235,7 +243,7 @@ Bạn vận hành 3 module nối tiếp trên cùng một hồ sơ tranh chấp:
 
 3. LEGALMIND (Recovery Intelligence):
 - Dựa trên kết quả của AskPay và DoubtStamp để lập danh sách kiểm tra (disputeChecklist), các bước thu thập bằng chứng còn thiếu (missingEvidenceSteps) và hướng dẫn liên hệ nền tảng/đơn vị liên quan (platformEscalationGuidance).
-- Phân biệt rõ hướng dẫn kỹ thuật (tra cứu Snowtrace/Snowscan Fuji, kiểm tra quyền approve token, trích xuất log hợp đồng) với thông tin tham khảo pháp lý.
+- Phân biệt rõ hướng dẫn kỹ thuật (tra cứu ${netCfg.explorerTxBase}, kiểm tra quyền approve token, trích xuất log hợp đồng) với thông tin tham khảo pháp lý.
 - Nếu đề cập quy định pháp luật tại Việt Nam (ví dụ Bộ luật Dân sự 2015 về giao dịch dân sự/nghĩa vụ hoàn trả tài sản không có căn cứ pháp luật hoặc quy định tố giác tội phạm mạng), phải ghi rõ nguồn văn bản và phạm vi áp dụng.
 - TUYỆT ĐỐI KHÔNG cam kết lấy lại được tiền, KHÔNG tuyên bố có thể đảo ngược giao dịch đã xác nhận trên blockchain, và KHÔNG tự phán quyết cuối cùng thay cho Human Reviewer.
 - Trả lời hoàn toàn bằng tiếng Việt chuyên nghiệp, rõ ràng, súc tích.
@@ -371,8 +379,8 @@ Bạn vận hành 3 module nối tiếp trên cùng một hồ sơ tranh chấp:
     },
     onChainVerification: {
       verified: txResult.success,
-      networkName: "Avalanche Fuji Testnet",
-      chainId: 43113,
+      networkName: netCfg.name,
+      chainId: netCfg.chainId,
       txData: txResult.success ? txResult.data : null,
       verificationError: txResult.success ? undefined : txResult.error.message,
     },

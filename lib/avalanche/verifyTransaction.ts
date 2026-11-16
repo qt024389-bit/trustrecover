@@ -57,15 +57,16 @@ export async function verifyFujiTransaction(
 
   try {
     const provider = getAvalancheProvider(cfg);
-    const network = await provider.getNetwork();
+    const rpcChainIdHex = (await provider.send("eth_chainId", [])) as string;
+    const rpcChainId = Number.parseInt(rpcChainIdHex, 16);
 
-    if (Number(network.chainId) !== cfg.chainId) {
+    if (!Number.isFinite(rpcChainId) || rpcChainId !== cfg.chainId) {
       return {
         success: false,
         verifiedOnChain: false,
         error: {
           code: "CHAIN_MISMATCH",
-          message: `Chain ID từ RPC (${network.chainId.toString()}) không khớp với ${cfg.name} (${cfg.chainId}).`,
+          message: `Chain ID thực tế từ RPC eth_chainId (${rpcChainIdHex} / ${rpcChainId}) không khớp với ${cfg.name} (${cfg.chainId}).`,
         },
         queriedAt,
       };

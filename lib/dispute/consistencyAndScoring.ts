@@ -36,7 +36,7 @@ export function evaluateCrossEngineAndReadiness(params: {
   // 1. Kiem tra cheo: Khong co Tx on-chain nhung DoubtStamp lai ket luan VERIFIED
   if (!hasVerifiedOnChain && verifiedFindingsCount > 0) {
     conflicts.push(
-      "Mâu thuẫn giữa AskPay và DoubtStamp: Fuji RPC không xác minh được giao dịch on-chain nhưng DoubtStamp lại gắn nhãn VERIFIED."
+      "Mâu thuẫn giữa AskPay và DoubtStamp: Blockchain RPC không xác minh được giao dịch on-chain nhưng DoubtStamp lại gắn nhãn VERIFIED."
     );
   }
 
@@ -61,9 +61,9 @@ export function evaluateCrossEngineAndReadiness(params: {
   let finalTransparentConclusion = "";
   if (!hasVerifiedOnChain) {
     finalTransparentConclusion =
-      "Chưa đủ cơ sở xác minh giao dịch trên Avalanche Fuji Testnet. Cần kiểm tra lại Transaction Hash trước khi tiến hành bước tiếp theo (Bắt buộc Human Review).";
+      "Chưa đủ cơ sở xác minh giao dịch trên mạng Avalanche đã chọn. Cần kiểm tra lại Transaction Hash trước khi tiến hành bước tiếp theo (Bắt buộc Human Review).";
   } else if (contradictedFindingsCount > 0) {
-    finalTransparentConclusion = `Giao dịch đã xác nhận trên Fuji nhưng phát hiện ${contradictedFindingsCount} điểm mâu thuẫn trực tiếp giữa lời khai và dữ liệu on-chain. Cần Human Reviewer đối chiếu bổ sung.`;
+    finalTransparentConclusion = `Giao dịch đã xác nhận trên blockchain nhưng phát hiện ${contradictedFindingsCount} điểm mâu thuẫn trực tiếp giữa lời khai và dữ liệu on-chain. Cần Human Reviewer đối chiếu bổ sung.`;
   } else if (evidenceFiles.length === 0) {
     finalTransparentConclusion =
       "Dữ liệu giao dịch on-chain khớp với lời khai kỹ thuật, nhưng vẫn thiếu tệp bằng chứng ngoài chuỗi để kết luận toàn diện tranh chấp.";
@@ -77,15 +77,15 @@ export function evaluateCrossEngineAndReadiness(params: {
 
   const txPoints = isConfirmedOnChain ? 30 : hasVerifiedOnChain ? 10 : 0;
   factors.push({
-    factor: "Xác minh giao dịch On-Chain (Fuji RPC)",
+    factor: "Xác minh giao dịch On-Chain (Blockchain RPC)",
     points: txPoints,
     maxPoints: 30,
     status: txPoints === 30 ? "PASS" : txPoints > 0 ? "PARTIAL" : "MISSING",
     explanation: isConfirmedOnChain
-      ? "Giao dịch tồn tại và đã xác nhận (CONFIRMED) trên Avalanche Fuji (43113)."
+      ? "Giao dịch tồn tại và đã xác nhận (CONFIRMED) trên mạng Avalanche đã chọn."
       : hasVerifiedOnChain
       ? "Giao dịch tồn tại nhưng chưa xác nhận thành công (pending/failed)."
-      : "Không tìm thấy hoặc không đọc được giao dịch trên Fuji RPC.",
+      : "Không tìm thấy hoặc không đọc được giao dịch trên Blockchain RPC.",
   });
 
   const claimPoints =
@@ -145,7 +145,7 @@ export function evaluateCrossEngineAndReadiness(params: {
 
   if (!hasVerifiedOnChain && rawScore > 25) {
     rawScore = 25;
-    capApplied = "Giới hạn trần 25/100 vì thiếu bằng chứng giao dịch xác thực trên Avalanche Fuji.";
+    capApplied = "Giới hạn trần 25/100 vì thiếu bằng chứng giao dịch xác thực trên mạng Avalanche đã chọn.";
   } else if (contradictedFindingsCount > 0 && rawScore > 40) {
     rawScore = 40;
     capApplied = "Giới hạn trần 40/100 vì lời khai có điểm mâu thuẫn trực tiếp với dữ liệu on-chain.";
