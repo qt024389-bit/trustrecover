@@ -1,4 +1,4 @@
-export type AvalancheNetworkId = "fuji" | "dispatch";
+export type AvalancheNetworkId = "fuji" | "dispatch" | "mainnet";
 
 export interface AvalancheNetworkConfig {
   id: AvalancheNetworkId;
@@ -30,11 +30,20 @@ export const AVALANCHE_NETWORKS: Record<AvalancheNetworkId, AvalancheNetworkConf
     explorerTxBase: "https://subnets-test.avax.network/dispatch/tx/",
     nativeSymbol: "DISP",
   },
+  mainnet: {
+    id: "mainnet",
+    name: "Avalanche C-Chain Mainnet",
+    chainId: 43114,
+    rpcUrl:
+      process.env.AVALANCHE_MAINNET_RPC_URL ||
+      "https://api.avax.network/ext/bc/C/rpc",
+    explorerTxBase: "https://snowtrace.io/tx/",
+    nativeSymbol: "AVAX",
+  },
 };
 
 export function resolveAvalancheNetwork(raw?: unknown): AvalancheNetworkConfig {
-  if (raw === "dispatch") {
-    return AVALANCHE_NETWORKS.dispatch;
-  }
+  if (raw === "dispatch") return AVALANCHE_NETWORKS.dispatch;
+  if (raw === "mainnet") return AVALANCHE_NETWORKS.mainnet;
   return AVALANCHE_NETWORKS.fuji;
 }

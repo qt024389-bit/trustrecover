@@ -43,7 +43,7 @@ export default function DisputeIntelligenceWorkspace({
   onCaseSaved?: (cases: DisputeCaseAnalysis[]) => void;
 }) {
   const [txHash, setTxHash] = useState("");
-  const [network, setNetwork] = useState<"fuji" | "dispatch">("fuji");
+  const [network, setNetwork] = useState<"fuji" | "dispatch" | "mainnet">("fuji");
   const [userClaim, setUserClaim] = useState("");
   const [claimedAmountAvax, setClaimedAmountAvax] = useState("");
   const [claimedRecipient, setClaimedRecipient] = useState("");
@@ -249,11 +249,12 @@ export default function DisputeIntelligenceWorkspace({
             <span className="text-xs font-medium text-slate-300">Mạng lưới Avalanche:</span>
             <select
               value={network}
-              onChange={(e) => setNetwork(e.target.value as "fuji" | "dispatch")}
+              onChange={(e) => setNetwork(e.target.value as "fuji" | "dispatch" | "mainnet")}
               className="rounded-lg border border-white/10 bg-slate-950/80 px-3 py-1.5 text-xs text-slate-100 focus:border-cyan-500 focus:outline-none"
             >
               <option value="fuji">Avalanche Fuji C-Chain (43113)</option>
               <option value="dispatch">Dispatch L1 Testnet — ICM (779672)</option>
+              <option value="mainnet">Avalanche C-Chain Mainnet (43114)</option>
             </select>
           </div>
           <div>

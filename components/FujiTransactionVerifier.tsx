@@ -12,7 +12,7 @@ export default function FujiTransactionVerifier({
   prefillTxHash?: { nonce: number; txHash: string } | null;
 }) {
   const [txHash, setTxHash] = useState("");
-  const [network, setNetwork] = useState<"fuji" | "dispatch">("fuji");
+  const [network, setNetwork] = useState<"fuji" | "dispatch" | "mainnet">("fuji");
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<VerifyTransactionResult | null>(null);
 
@@ -76,11 +76,12 @@ export default function FujiTransactionVerifier({
       <form onSubmit={handleVerify} className="mt-4 flex flex-col gap-3 sm:flex-row">
         <select
           value={network}
-          onChange={(e) => setNetwork(e.target.value as "fuji" | "dispatch")}
+          onChange={(e) => setNetwork(e.target.value as "fuji" | "dispatch" | "mainnet")}
           className="rounded-xl border border-white/10 bg-slate-950/80 px-3 py-2.5 text-xs text-slate-100 focus:border-emerald-500 focus:outline-none"
         >
           <option value="fuji">Fuji C-Chain (43113)</option>
           <option value="dispatch">Dispatch L1 (779672)</option>
+          <option value="mainnet">Avalanche Mainnet (43114)</option>
         </select>
         <input
           type="text"

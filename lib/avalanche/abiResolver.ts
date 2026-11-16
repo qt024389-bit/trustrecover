@@ -15,7 +15,8 @@ export async function fetchVerifiedContractInterface(
   const timer = setTimeout(() => controller.abort(), 3500);
 
   try {
-    const url = `https://api.routescan.io/v2/network/testnet/evm/${chainId}/etherscan/api?module=contract&action=getabi&address=${address}`;
+    const netSeg = chainId === 43114 ? "mainnet" : "testnet";
+    const url = `https://api.routescan.io/v2/network/${netSeg}/evm/${chainId}/etherscan/api?module=contract&action=getabi&address=${address}`;
     const res = await fetch(url, { signal: controller.signal });
     if (!res.ok) {
       abiCache.set(key, null);
