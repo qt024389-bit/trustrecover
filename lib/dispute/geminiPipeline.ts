@@ -10,7 +10,7 @@ import type {
 } from "./types";
 
 const OVERALL_AI_DEADLINE_MS = 48_000;
-const PER_ATTEMPT_CAP_MS = 18_000;
+const PER_ATTEMPT_CAP_MS = 13_000;
 const MIN_REMAINING_FOR_FALLBACK_MS = 3_500;
 
 export interface AiAttemptLog {
@@ -391,7 +391,7 @@ Trả lời bằng tiếng Việt súc tích, đúng JSON schema.`.trim();
     }
   }
 
-  const candidateModels = ["gemini-3.6-flash", "gemini-3.5-flash", "gemini-3.5-flash-lite"];
+  const candidateModels = ["gemini-3.6-flash", "gemini-3.5-flash-lite", "gemini-3.7-flash", "gemini-3.5-flash"];
   const deadlineAt = Date.now() + OVERALL_AI_DEADLINE_MS;
   const attempts: AiAttemptLog[] = [];
 
