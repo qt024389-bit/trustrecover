@@ -1,6 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
 import { processUploadedEvidenceFiles } from "@/lib/dispute/evidence";
-import { runDisputeIntelligencePipeline } from "@/lib/dispute/geminiPipeline";
+import {
+  runDisputeIntelligencePipeline,
+  AiServiceUnavailableError,
+} from "@/lib/dispute/geminiPipeline";
 import type { EvidenceFileMeta } from "@/lib/dispute/types";
 import { checkRateLimit } from "@/lib/security/rateLimit";
 
@@ -10,14 +13,23 @@ export async function POST(request: NextRequest) {
   const clientIp = request.headers.get("x-forwarded-for") || "local";
   const rl = checkRateLimit("dispute:" + clientIp);
   if (!rl.allowed) {
-    return NextResponse.json({ success: false, error: { code: "RATE_LIMIT_EXCEEDED", message: "Quá nhiều yêu cầu. Vui lòng thử lại sau 1 phút." } }, { status: 429 });
+    return NextResponse.json(
+      {
+        success: false,
+        error: {
+          code: "RATE_LIMIT_EXCEEDED",
+          message: "Quá nhiều yêu cầu. Vui lòng thử lại sau 1 phút.",
+        },
+      },
+      { status: 429 }
+    );
   }
   try {
     const contentType = request.headers.get("content-type") || "";
     let txHash = "";
     let userClaim = "";
     let claimedAmountAvax = "";
-      let claimedAsset = "";
+    let claimedAsset = "";
     let claimedRecipient = "";
     let network = "fuji";
     let evidenceFiles: EvidenceFileMeta[] = [];
@@ -27,7 +39,7 @@ export async function POST(request: NextRequest) {
       txHash = String(formData.get("txHash") || "").trim();
       userClaim = String(formData.get("userClaim") || "").trim();
       claimedAmountAvax = String(formData.get("claimedAmountAvax") || "").trim();
-        claimedAsset = String(formData.get("claimedAsset") || "").trim();
+      claimedAsset = String(formData.get("claimedAsset") || "").trim();
       claimedRecipient = String(formData.get("claimedRecipient") || "").trim();
       network = String(formData.get("network") || "fuji").trim();
 
@@ -66,7 +78,7 @@ export async function POST(request: NextRequest) {
       txHash = String(body.txHash || "").trim();
       userClaim = String(body.userClaim || "").trim();
       claimedAmountAvax = String(body.claimedAmountAvax || "").trim();
-        claimedAsset = String(body.claimedAsset || "").trim();
+      claimedAsset = String(body.claimedAsset || "").trim();
       claimedRecipient = String(body.claimedRecipient || "").trim();
       network = String(body.network || "fuji").trim();
     }
@@ -102,20 +114,31 @@ export async function POST(request: NextRequest) {
       txHash,
       userClaim,
       claimedAmountAvax: claimedAmountAvax || undefined,
-        claimedAsset: claimedAsset || undefined,
+      claimedAsset: claimedAsset || undefined,
       claimedRecipient: claimedRecipient || undefined,
       network,
       evidenceFiles,
     });
 
-    return NextResponse.json(
-      {
-        success: true,
-        data: analysis,
-      },
-      { status: 200 }
-    );
+    return NextResponse.json({ success: true, data: analysis }, { status: 200 });
   } catch (err: unknown) {
+    if (err instanceof AiServiceUnavailableError) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: {
+            code: err.errorCode,
+            message: err.message,
+            attempts: err.attempts,
+          },
+          data: {
+            onChainVerification: err.onChainVerification,
+            auditHistory: err.auditHistory,
+          },
+        },
+        { status: 503 }
+      );
+    }
     const message =
       err instanceof Error
         ? err.message

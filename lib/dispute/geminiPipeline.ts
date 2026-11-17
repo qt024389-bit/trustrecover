@@ -10,8 +10,37 @@ import type {
 } from "./types";
 
 const OVERALL_AI_DEADLINE_MS = 48_000;
-const PER_ATTEMPT_CAP_MS = 32_000;
-const MIN_REMAINING_FOR_FALLBACK_MS = 4_000;
+const PER_ATTEMPT_CAP_MS = 18_000;
+const MIN_REMAINING_FOR_FALLBACK_MS = 3_500;
+
+export interface AiAttemptLog {
+  model: string;
+  errorStatus: number;
+  errorCode: string;
+  retryCount: number;
+  durationMs: number;
+}
+
+export class AiServiceUnavailableError extends Error {
+  public readonly statusCode = 503;
+  public readonly errorCode = "AI_SERVICE_UNAVAILABLE";
+  public readonly attempts: AiAttemptLog[];
+  public readonly onChainVerification: DisputeCaseAnalysis["onChainVerification"];
+  public readonly auditHistory: AuditLogEntry[];
+
+  constructor(params: {
+    message: string;
+    attempts: AiAttemptLog[];
+    onChainVerification: DisputeCaseAnalysis["onChainVerification"];
+    auditHistory: AuditLogEntry[];
+  }) {
+    super(params.message);
+    this.name = "AiServiceUnavailableError";
+    this.attempts = params.attempts;
+    this.onChainVerification = params.onChainVerification;
+    this.auditHistory = params.auditHistory;
+  }
+}
 
 const AI_RESPONSE_SCHEMA: Schema = {
   type: Type.OBJECT,
@@ -221,34 +250,48 @@ function logPipelineStage(data: {
   durationMs: number;
   status: "OK" | "ERROR";
   model?: string;
+  errorStatus?: number;
+  errorCode?: string;
+  retryCount?: number;
   mimeType?: string;
   sizeBytes?: number;
-  errorCode?: string;
 }) {
   console.log(JSON.stringify({ service: "TRUSTRECOVER_PIPELINE", ...data }));
 }
 
-function isTransientAiError(err: unknown): { transient: boolean; code: string } {
+function classifyAiError(err: unknown): {
+  transient: boolean;
+  errorStatus: number;
+  errorCode: string;
+  retryAfterMs?: number;
+} {
   const msg = err instanceof Error ? err.message : String(err);
-  if (err instanceof Error && err.name === "AbortError") {
-    return { transient: true, code: "ABORT_TIMEOUT" };
+
+  let retryAfterMs: number | undefined;
+  const delayMatch = msg.match(/"retryDelay"\s*:\s*"(\d+)s"/i) || msg.match(/retry in\s+([0-9.]+)s/i);
+  if (delayMatch) {
+    retryAfterMs = Math.ceil(Number(delayMatch[1]) * 1000);
   }
-  if (msg.includes("ABORT_TIMEOUT") || msg.includes("Timeout")) {
-    return { transient: true, code: "TIMEOUT" };
+
+  if ((err instanceof Error && err.name === "AbortError") || msg.includes("ABORT_TIMEOUT") || msg.includes("Timeout")) {
+    return { transient: true, errorStatus: 408, errorCode: "ABORT_TIMEOUT" };
   }
   if (msg.includes("429") || msg.includes("RESOURCE_EXHAUSTED")) {
-    return { transient: true, code: "HTTP_429" };
+    return { transient: true, errorStatus: 429, errorCode: "HTTP_429", retryAfterMs };
   }
   if (msg.includes("503") || msg.includes("UNAVAILABLE") || msg.includes("high demand")) {
-    return { transient: true, code: "HTTP_503" };
+    return { transient: true, errorStatus: 503, errorCode: "HTTP_503", retryAfterMs };
   }
   if (msg.includes("400") || msg.includes("INVALID_ARGUMENT")) {
-    return { transient: false, code: "HTTP_400" };
+    return { transient: false, errorStatus: 400, errorCode: "HTTP_400" };
   }
   if (msg.includes("404") || msg.includes("not found")) {
-    return { transient: false, code: "HTTP_404" };
+    return { transient: false, errorStatus: 404, errorCode: "HTTP_404" };
   }
-  return { transient: false, code: "AI_ERROR" };
+  if (msg.includes("INVALID_AI_JSON_STRUCTURE")) {
+    return { transient: true, errorStatus: 502, errorCode: "INVALID_AI_JSON_STRUCTURE" };
+  }
+  return { transient: false, errorStatus: 500, errorCode: "AI_ERROR" };
 }
 
 export async function runDisputeIntelligencePipeline(
@@ -256,9 +299,7 @@ export async function runDisputeIntelligencePipeline(
 ): Promise<DisputeCaseAnalysis> {
   const apiKey = process.env.GEMINI_API_KEY?.trim();
   if (!apiKey || apiKey === "DAN_MA_GEMINI_API_KEY_CUA_BAN_VAO_DAY") {
-    throw new Error(
-      "GEMINI_API_KEY chưa được cấu hình hợp lệ ở phía server."
-    );
+    throw new Error("GEMINI_API_KEY chưa được cấu hình hợp lệ ở phía server.");
   }
 
   const auditHistory: AuditLogEntry[] = [];
@@ -286,6 +327,14 @@ export async function runDisputeIntelligencePipeline(
       : `Không xác minh được giao dịch (${txResult.error.code}): ${txResult.error.message}`,
   });
 
+  const onChainVerification: DisputeCaseAnalysis["onChainVerification"] = {
+    verified: txResult.success,
+    networkName: netCfg.name,
+    chainId: netCfg.chainId,
+    txData: txResult.success ? txResult.data : null,
+    verificationError: txResult.success ? undefined : txResult.error.message,
+  };
+
   // 2. Record evidence SHA-256 commitments
   if (params.evidenceFiles.length > 0) {
     auditHistory.push({
@@ -300,19 +349,19 @@ export async function runDisputeIntelligencePipeline(
 
   // 3. Build compact payload + multimodal parts
   const ai = new GoogleGenAI({ apiKey });
-
-  const systemInstruction = `
-Bạn là hệ thống AI Dispute Intelligence (AskPay • DoubtStamp • LegalMind) của TRUSTRECOVER trên mạng ${netCfg.name} (Chain ID ${netCfg.chainId}).
-Nguyên tắc TUYỆT ĐỐI TRUNG THỰC:
-1. AskPay: Chỉ dùng dữ kiện thật trong ONCHAIN_VERIFICATION_DATA. Nếu claimedAsset khác AVAX (VD: USDT.e, WETH.e), phải đối chiếu claimedAmount với decodedEvents, tuyệt đối KHÔNG hiểu nhầm thành AVAX. Giải mã dòng chảy token từ decodedEvents nếu valueAvax=0. Phân biệt EOA với Smart Contract. Tách rõ: (a) Dữ kiện RPC, (b) Lời khai/Tài liệu, (c) Giới hạn chưa đủ cơ sở on-chain.
-2. DoubtStamp: Đối chiếu tối đa 6 khía cạnh cốt lõi (Mạng/Chain ID, Tài sản/Số lượng, Ví nhận/Contract, Tài liệu bằng chứng). Phân biệt giao dịch cấp phí gas với giao dịch rút tài sản; nếu lời khai nêu tổng thiệt hại toàn vụ nhưng TxHash chỉ là 1 giao dịch thành phần, ghi rõ PARTIAL/CONTRADICTED ở quy mô và nêu missingEvidence. Không tự bịa hash hay nâng điểm. Verdict: VERIFIED | CONTRADICTED | INSUFFICIENT | UNVERIFIABLE.
-3. LegalMind: Lập tối đa 5 bước disputeChecklist, missingEvidenceSteps, platformEscalationGuidance. Hướng dẫn tra cứu tại ${netCfg.explorerTxBase}. Đối chiếu pháp luật thực tế (VD Việt Nam: BLDS 2015 Điều 579, 584; BLHS 2015 sửa đổi 2017 Điều 289, 290; Luật An ninh mạng 2018). Không tuyên bố đảo ngược giao dịch blockchain; không thay thế Human Reviewer.
-Trả lời bằng tiếng Việt súc tích, đúng JSON schema.`.trim();
-
   const { claimedAmount, claimedAsset } = parseClaimedAmountAndAsset(
     params.claimedAmountAvax,
     params.claimedAsset
   );
+
+  const systemInstruction = `
+Bạn là hệ thống AI Dispute Intelligence (AskPay • DoubtStamp • LegalMind) của TRUSTRECOVER trên mạng ${netCfg.name} (Chain ID ${netCfg.chainId}).
+Nguyên tắc TUYỆT ĐỐI TRUNG THỰC:
+1. AskPay: Chỉ dùng dữ kiện thật trong ONCHAIN_VERIFICATION_DATA. Nếu claimedAsset khác AVAX (VD: USDT.e, WETH.e, USDC), phải đối chiếu claimedAmount với decodedEvents ERC-20, tuyệt đối KHÔNG hiểu nhầm hoặc quy đổi thành AVAX. Phân biệt EOA với Smart Contract. Tách rõ: (a) Dữ kiện RPC, (b) Lời khai/Tài liệu, (c) Giới hạn chưa đủ cơ sở on-chain.
+2. DoubtStamp: Đối chiếu tối đa 6 khía cạnh cốt lõi (Mạng/Chain ID, Tài sản/Đơn vị & Số lượng, Ví nhận/Contract, Tài liệu bằng chứng). Phân biệt giao dịch cấp phí gas với giao dịch rút tài sản; nếu lời khai nêu tổng thiệt hại toàn vụ nhưng TxHash chỉ là 1 giao dịch thành phần, ghi rõ PARTIAL/CONTRADICTED ở quy mô và nêu missingEvidence. Không tự bịa hash hay nâng điểm. Verdict: VERIFIED | CONTRADICTED | INSUFFICIENT | UNVERIFIABLE.
+3. LegalMind: Lập tối đa 5 bước disputeChecklist, missingEvidenceSteps, platformEscalationGuidance. Hướng dẫn tra cứu tại ${netCfg.explorerTxBase}. Đối chiếu pháp luật thực tế (VD Việt Nam: BLDS 2015 Điều 579, 584; BLHS 2015 sửa đổi 2017 Điều 289, 290; Luật An ninh mạng 2018). Không tuyên bố đảo ngược giao dịch blockchain; không thay thế Human Reviewer.
+Trả lời bằng tiếng Việt súc tích, đúng JSON schema.`.trim();
+
   const promptPayload = {
     USER_CLAIM: params.userClaim,
     claimedAmount,
@@ -344,15 +393,15 @@ Trả lời bằng tiếng Việt súc tích, đúng JSON schema.`.trim();
 
   const candidateModels = ["gemini-3.6-flash", "gemini-3.5-flash", "gemini-3.5-flash-lite"];
   const deadlineAt = Date.now() + OVERALL_AI_DEADLINE_MS;
+  const attempts: AiAttemptLog[] = [];
 
   let usedModel = candidateModels[0];
   let parsed: z.infer<typeof AiInvestigationZodSchema> | null = null;
   let lastError: unknown = null;
+  let allTransient = true;
 
-  const attemptQueue = [...candidateModels];
-  let addedSecondPass = false;
-  for (let idx = 0; idx < attemptQueue.length; idx++) {
-    const candidate = attemptQueue[idx];
+  for (let idx = 0; idx < candidateModels.length; idx++) {
+    const candidate = candidateModels[idx];
     const remainingMs = deadlineAt - Date.now();
     if (remainingMs < MIN_REMAINING_FOR_FALLBACK_MS) {
       lastError = new Error("Đã hết thời gian ngân sách tổng thể (48s) cho pipeline AI.");
@@ -374,7 +423,7 @@ Trả lời bằng tiếng Việt súc tích, đúng JSON schema.`.trim();
           responseMimeType: "application/json",
           responseSchema: AI_RESPONSE_SCHEMA,
           temperature: 0.1,
-          maxOutputTokens: 3060,
+          maxOutputTokens: 4096,
           abortSignal: controller.signal,
         },
       });
@@ -384,9 +433,12 @@ Trả lời bằng tiếng Việt súc tích, đúng JSON schema.`.trim();
         throw new Error("INVALID_AI_JSON_STRUCTURE: Phản hồi AI rỗng.");
       }
 
-      let rawJson: unknown;
-      try {
-        rawJson = JSON.parse(rawText);
+      const firstBrace = rawText.indexOf("{");
+        const lastBrace = rawText.lastIndexOf("}");
+        const jsonCandidate = firstBrace !== -1 && lastBrace > firstBrace ? rawText.slice(firstBrace, lastBrace + 1) : rawText;
+        let rawJson: unknown;
+        try {
+          rawJson = JSON.parse(jsonCandidate);
       } catch {
         throw new Error("INVALID_AI_JSON_STRUCTURE: Đầu ra AI không phải JSON hợp lệ.");
       }
@@ -404,31 +456,46 @@ Trả lời bằng tiếng Việt súc tích, đúng JSON schema.`.trim();
         durationMs: Date.now() - attemptStart,
         status: "OK",
         model: candidate,
+        retryCount: idx,
         mimeType: params.evidenceFiles[0]?.mimeType,
         sizeBytes: params.evidenceFiles.reduce((acc, f) => acc + f.sizeBytes, 0),
       });
       break;
     } catch (err) {
-      const { transient, code } = isTransientAiError(err);
+      const durationMs = Date.now() - attemptStart;
+      const { transient, errorStatus, errorCode, retryAfterMs } = classifyAiError(err);
+      attempts.push({ model: candidate, errorStatus, errorCode, retryCount: idx, durationMs });
+
       logPipelineStage({
         stage: "AI_ANALYSIS",
-        durationMs: Date.now() - attemptStart,
+        durationMs,
         status: "ERROR",
         model: candidate,
+        errorStatus,
+        errorCode,
+        retryCount: idx,
         mimeType: params.evidenceFiles[0]?.mimeType,
         sizeBytes: params.evidenceFiles.reduce((acc, f) => acc + f.sizeBytes, 0),
-        errorCode: code,
       });
+
       lastError = err;
       if (!transient) {
+        allTransient = false;
         break;
       }
-      if (code === "HTTP_503" && deadlineAt - Date.now() > MIN_REMAINING_FOR_FALLBACK_MS + 600) {
-        await new Promise((r) => setTimeout(r, 800));
-      }
-      if (idx === attemptQueue.length - 1 && !addedSecondPass && deadlineAt - Date.now() >= 15_000) {
-        addedSecondPass = true;
-        attemptQueue.push(...candidateModels);
+
+      const timeLeft = deadlineAt - Date.now();
+      const backoffMs =
+        retryAfterMs !== undefined
+          ? retryAfterMs <= 4_000 && timeLeft - retryAfterMs >= MIN_REMAINING_FOR_FALLBACK_MS
+            ? retryAfterMs
+            : 0
+          : errorCode === "HTTP_503" && timeLeft >= MIN_REMAINING_FOR_FALLBACK_MS + 800
+          ? 700 * (idx + 1)
+          : 0;
+
+      if (backoffMs > 0 && idx < candidateModels.length - 1) {
+        await new Promise((r) => setTimeout(r, backoffMs));
       }
     } finally {
       clearTimeout(timer);
@@ -436,9 +503,17 @@ Trả lời bằng tiếng Việt súc tích, đúng JSON schema.`.trim();
   }
 
   if (!parsed) {
+    if (allTransient) {
+      throw new AiServiceUnavailableError({
+        message: "Các mô hình Gemini hiện đang quá tải hoặc chạm giới hạn tạm thời (503/429/Timeout). Đã bảo toàn kết quả xác minh Avalanche RPC.",
+        attempts,
+        onChainVerification,
+        auditHistory,
+      });
+    }
     throw lastError instanceof Error
       ? lastError
-      : new Error("Không thể hoàn tất phân tích AI trong giới hạn thời gian.");
+      : new Error("Không thể hoàn tất phân tích AI.");
   }
 
   const cleanEvidence = params.evidenceFiles.map(({ inlineDataBase64, ...rest }) => rest);
@@ -470,13 +545,7 @@ Trả lời bằng tiếng Việt súc tích, đúng JSON schema.`.trim();
       claimedRecipient: params.claimedRecipient,
       evidenceFiles: cleanEvidence,
     },
-    onChainVerification: {
-      verified: txResult.success,
-      networkName: netCfg.name,
-      chainId: netCfg.chainId,
-      txData: txResult.success ? txResult.data : null,
-      verificationError: txResult.success ? undefined : txResult.error.message,
-    },
+    onChainVerification,
     aiInvestigation: {
       modelUsed: usedModel,
       askPay: parsed.askPay,
