@@ -311,6 +311,65 @@ Trả lời reply tối đa 2 câu bằng tiếng Việt; đặt targetTab="none
           throw new Error("INVALID_COPILOT_JSON: Đầu ra không phải JSON hợp lệ.");
         }
 
+        if (rawJson && typeof rawJson === "object") {
+          const obj = rawJson as Record<string, unknown>;
+          if (typeof obj.reply !== "string" || !obj.reply.trim()) {
+            obj.reply = "Đã trích xuất thông tin từ tài liệu và tự động điền vào biểu mẫu điều tra.";
+          } else if (obj.reply.length > 1450) {
+            obj.reply = obj.reply.slice(0, 1450);
+          }
+          const validTabs = ["none", "dashboard", "cases", "analysis", "audit", "settings"];
+          if (typeof obj.targetTab !== "string" || !validTabs.includes(obj.targetTab)) {
+            obj.targetTab = obj.autoFill ? "analysis" : "none";
+          }
+          if (obj.autoFill === null) {
+            delete obj.autoFill;
+          } else if (obj.autoFill && typeof obj.autoFill === "object") {
+            const af = obj.autoFill as Record<string, unknown>;
+            for (const k of Object.keys(af)) {
+              if (af[k] === null) {
+                delete af[k];
+              } else if (Array.isArray(af[k])) {
+                af[k] = (af[k] as unknown[]).map(String).join(" ");
+              } else if (typeof af[k] === "number" && k !== "loadDemo") {
+                af[k] = String(af[k]);
+              }
+            }
+            if (typeof af.txHash === "string") {
+              const m = af.txHash.replace(/\s+/g, "").match(/0x[a-fA-F0-9]{64}/);
+              if (m) af.txHash = m[0];
+            }
+            if (typeof af.claimedRecipient === "string") {
+              const m = af.claimedRecipient.replace(/\s+/g, "").match(/0x[a-fA-F0-9]{40}/);
+              if (m) af.claimedRecipient = m[0];
+            }
+            if (typeof af.claimedSender === "string") {
+              const m = af.claimedSender.replace(/\s+/g, "").match(/0x[a-fA-F0-9]{40}/);
+              if (m) af.claimedSender = m[0];
+            }
+            if (typeof af.network === "string") {
+              const net = af.network.toLowerCase();
+              if (net.includes("main") || net.includes("43114")) af.network = "mainnet";
+              else if (net.includes("fuji") || net.includes("43113")) af.network = "fuji";
+              else if (net.includes("dispatch") || net.includes("779672")) af.network = "dispatch";
+              else delete af.network;
+            }
+            if (af.loadDemo !== undefined && typeof af.loadDemo !== "boolean") {
+              if (af.loadDemo === "true") af.loadDemo = true;
+              else if (af.loadDemo === "false") af.loadDemo = false;
+              else delete af.loadDemo;
+            }
+            if (typeof af.userClaim !== "string" || !af.userClaim.trim()) {
+              af.userClaim =
+                (extractedFileText
+                  ? extractedFileText.replace(/\s+/g, " ").trim().slice(0, 220)
+                  : "Khiếu nại giao dịch trên mạng Avalanche.");
+            } else if (af.userClaim.length > 950) {
+              af.userClaim = af.userClaim.slice(0, 950);
+            }
+          }
+        }
+
         const parsed = CopilotZodSchema.safeParse(rawJson);
         if (!parsed.success) {
           throw new Error(
