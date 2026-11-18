@@ -252,9 +252,9 @@ Khi có tệp/ảnh đính kèm, trích xuất chính xác vào autoFill (không
 - txHash: mã giao dịch 0x (66 ký tự).
 - claimedAmountAvax: CHỈ phần số thuần không dấu phẩy (VD: "16000", "4.9894").
 - claimedAsset: "AVAX" | "WETH.e" | "USDC" | "WBTC.e" | "USDT.e" | "USD".
-- claimedRecipient: địa chỉ ví nhận 0x (42 ký tự).
+- claimedRecipient: BẮT BUỘC trích xuất ĐẦY ĐỦ 42 ký tự địa chỉ ví nhận/ví đích (0x + 40 ký tự hex), KHÔNG viết tắt dấu "...", KHÔNG bỏ trống. Nếu tệp có cả hợp đồng nguồn và ví nhận/ví đích, điền địa chỉ ví nhận/ví đích vào claimedRecipient.
 - claimedSender: địa chỉ người gửi/hợp đồng khai thác 0x (nếu có).
-- userClaim: tóm tắt nội dung khiếu nại 1-2 câu (dưới 250 ký tự), KHÔNG chép nguyên văn trích dẫn dài.
+- userClaim: tóm tắt giao dịch đang khiếu nại trong 1 câu ngắn gọn (dưới 200 ký tự), CHỈ nêu đúng số lượng tài sản của riêng giao dịch này, KHÔNG gộp tổng thiệt hại toàn vụ hack bên ngoài.
 
 Trả lời reply tối đa 2 câu bằng tiếng Việt; đặt targetTab="none" nếu người dùng chỉ hỏi đáp.`.trim();
 
@@ -360,6 +360,43 @@ Trả lời reply tối đa 2 câu bằng tiếng Việt; đặt targetTab="none
         },
         { status: 500 }
       );
+    }
+
+    if (validatedData.autoFill) {
+      if (validatedData.autoFill.txHash) {
+        validatedData.autoFill.txHash = validatedData.autoFill.txHash.replace(/\s+/g, "");
+      }
+      if (validatedData.autoFill.claimedSender) {
+        validatedData.autoFill.claimedSender = validatedData.autoFill.claimedSender.replace(/\s+/g, "");
+      }
+      if (validatedData.autoFill.claimedRecipient) {
+        validatedData.autoFill.claimedRecipient = validatedData.autoFill.claimedRecipient.replace(/\s+/g, "");
+      }
+      const isValidEthAddr = (v?: string) => Boolean(v && /^0x[a-fA-F0-9]{40}$/.test(v));
+      if (!isValidEthAddr(validatedData.autoFill.claimedRecipient) && extractedFileText) {
+        const joinedText = extractedFileText.replace(/(0x[a-fA-F0-9]{6,})\s+([a-fA-F0-9]{6,})/g, "$1$2");
+        const labelMatch = joinedText.match(
+          /(?:địa chỉ\s*nhận|ví\s*nhận|ví\s*đích|người\s*nhận|recipient|destination|to\s*address|attacker\s*wallet|beneficiary)[^\n\r0x]{0,45}(0x[a-fA-F0-9]{40})(?![a-fA-F0-9])/i
+        );
+        if (labelMatch && isValidEthAddr(labelMatch[1])) {
+          validatedData.autoFill.claimedRecipient = labelMatch[1];
+        } else {
+          const txLower = (validatedData.autoFill.txHash || "").toLowerCase();
+          const senderLower = (validatedData.autoFill.claimedSender || "").toLowerCase();
+          const allAddrs: string[] = [];
+          const addrRegex = /(?:^|[^a-fA-F0-9])(0x[a-fA-F0-9]{40})(?![a-fA-F0-9])/g;
+          let m: RegExpExecArray | null;
+          while ((m = addrRegex.exec(joinedText)) !== null) {
+            allAddrs.push(m[1]);
+          }
+          const distinct = Array.from(new Set(allAddrs)).filter(
+            (a) => a.toLowerCase() !== senderLower && !txLower.startsWith(a.toLowerCase())
+          );
+          if (distinct.length > 0) {
+            validatedData.autoFill.claimedRecipient = distinct[distinct.length - 1];
+          }
+        }
+      }
     }
 
     return NextResponse.json({ success: true, data: validatedData }, { status: 200 });
